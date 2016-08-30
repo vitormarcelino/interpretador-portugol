@@ -1,0 +1,25 @@
+{
+  "name": "client-jspt",
+  "version": "1.0.0",
+  "description": "Portugol no javascript",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify src/myapp.js -o src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "jspt-client"
+  },
+  "keywords": [
+    "jspt",
+    "portugol",
+    "javascript"
+  ],
+  "author": "Iniciação Científica",
+  "license": "MIT",
+  "dependencies": {
+    "codemirror": "^5.18.2",
+    "jquery": "^2.2.4",
+    "jspt": "0.0.1-alpha"
+  }
+}
