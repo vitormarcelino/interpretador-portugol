@@ -4,7 +4,8 @@
   "description": "Portugol no javascript",
   "main": "index.js",
   "scripts": {
-    "build": "browserify src/myapp.js -o src/main.js"
+    "buildOld": "browserify src/myapp.js -o src/main.js",
+    "build": "browserify -t browserify-css src/myapp.js -o src/main.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,10 @@
   "dependencies": {
     "codemirror": "^5.18.2",
     "jquery": "^2.2.4",
-    "jspt": "0.0.1-alpha"
+    "jspt": "0.0.1-alpha",
+    "terminal-kit": "^0.24.26"
+  },
+  "devDependencies": {
+    "browserify-css": "^0.9.1"
   }
 }
