@@ -17,7 +17,7 @@ var editor = CodeMirror.fromTextArea(document.getElementById("codigo"), {
   lineNumbers: false,
   readOnly: false,
   lineNumbers: true,
-  theme: 'monokai',
+  theme: 'eclipse',
   mode: "portugol"
 }); 
 
