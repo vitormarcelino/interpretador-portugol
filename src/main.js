@@ -9034,7 +9034,7 @@ CodeMirror.defineMode("portugol", function() {
                        "enquanto fimenquanto escreva e ou xou nao repete leia " +
                        "para fimpara se entao fimse retorne de ate passo senao faca " +
              "caracter string arranjo registro fimprocedimento fimfuncao fimregistro verdadeiro falso ");*/
-  var keywords = words("algoritmo variaveis inteiro real logico literal fimvariaveis inicio fim se entao senao fimse imprima");
+  var keywords = words("algoritmo variaveis inteiro real logico literal fimvariaveis inicio fim se entao senao fimse imprima para");
 
 
 
