@@ -20,12 +20,9 @@
   "license": "MIT",
   "dependencies": {
     "codemirror": "^5.18.2",
-    "console-io": "^2.7.8",
-    "express": "^4.14.0",
     "jquery": "^2.2.4",
     "jquery.terminal": "^0.10.12",
-    "jspt": "0.0.1-alpha",
-    "terminal-kit": "^0.24.26"
+    "jspt": "0.0.1-alpha"
   },
   "devDependencies": {
     "browserify-css": "^0.9.1"
