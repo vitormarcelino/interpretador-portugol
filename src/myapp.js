@@ -1,13 +1,28 @@
+//CSS
 var css = require('./app.css');
-console.log(css);
-//REQUIRE NO JSPT
-var jspt = require('jspt');
 
 //REQUIRE NO JQUERY
-var $ = require('jquery');
+global.jQuery = require('jquery');
+
+//TERMINAL
+global.terminal = null;
+require('jquery.terminal');
+jQuery(function($) {
+    global.terminal = $('#term_demo').terminal(function(command, term) {
+      //FUNÇÕES DO TERMINAL
+    }, {
+        greetings: '',
+        name: 'portugol',
+        height: 200,
+        prompt: '$ ' 
+    });
+});
 
 //REQUIRE MODE PORTUGOL PARA CODEMIRROR
 require('codemirror/mode/portugol/portugol');
+
+//REQUIRE NO JSPT
+var jspt = require('jspt');
 
 //REQUIRE CODEMIRROR
 
@@ -21,9 +36,9 @@ var editor = CodeMirror.fromTextArea(document.getElementById("codigo"), {
   mode: "portugol"
 }); 
 
-$('body').append(editor);
+jQuery('body').append(editor);
 
-var btn = $('#exec').on('click', function() {
+var btn = jQuery('#exec').on('click', function() {
 	//LIMPA O TERMINAL
 	document.getElementById("painel").innerHTML = '';
 	var codigo = editor.getValue();
@@ -35,3 +50,7 @@ var btn = $('#exec').on('click', function() {
 function createContext() {
     return require('../node_modules/jspt/lib/jspt/modules/std').module;
 }
+escreveTerminal = function(texto) {
+ 	//alert(JSON.stringify(term));
+ 	term.push("ola");
+};
