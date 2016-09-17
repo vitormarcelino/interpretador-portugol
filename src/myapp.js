@@ -40,7 +40,7 @@ jQuery('body').append(editor);
 
 var btn = jQuery('#exec').on('click', function() {
 	//LIMPA O TERMINAL
-	document.getElementById("painel").innerHTML = '';
+	global.terminal.clear();
 	var codigo = editor.getValue();
 	console.log(codigo);
   	jspt.execute(codigo, createContext());

@@ -25798,7 +25798,6 @@ var Context = require('../context').context,
     slice = Array.prototype.slice,
     std = new Context();
 
-    var cont = 1; // ATRIBUI UM CONTADOR PARA DEFINIR, OU NÃO, A QUEBRA DE LINHA AO PRINTAR
 
 std.setFunction('imprima', function () {
     var args = slice.call(arguments, 0);
@@ -25806,20 +25805,7 @@ std.setFunction('imprima', function () {
     var aux = '';
 
     if (args.length > 0) {
-    	if (cont>1) {
-    		console.log(args.join(''));
-        	//IMPRIME O CONTEUDO NA DIV PAINEL
-        	//document.getElementById('painel').innerHTML += "<br/>" + args.join('');
-            global.terminal.echo(args.join(''));
-        	cont++;
-    	} else {
-    		console.log(args.join(''));
-        	//IMPRIME O CONTEUDO NA DIV PAINEL
-        	//document.getElementById('painel').innerHTML = args.join('');
-            global.terminal.echo(args.join(''));
-        	cont++;
-    	}
-        
+        global.terminal.echo(args.join(''));  
     }
 });
 
@@ -25874,7 +25860,7 @@ jQuery('body').append(editor);
 
 var btn = jQuery('#exec').on('click', function() {
 	//LIMPA O TERMINAL
-	document.getElementById("painel").innerHTML = '';
+	global.terminal.clear();
 	var codigo = editor.getValue();
 	console.log(codigo);
   	jspt.execute(codigo, createContext());
