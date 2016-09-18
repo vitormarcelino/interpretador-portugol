@@ -42,15 +42,10 @@ var btn = jQuery('#exec').on('click', function() {
 	//LIMPA O TERMINAL
 	global.terminal.clear();
 	var codigo = editor.getValue();
-	console.log(codigo);
-  	jspt.execute(codigo, createContext());
+  jspt.execute(codigo, createContext());
 });
 
 //FUNÇÃO CRIAR CONTEXTO PARA A EXECUÇÃO
 function createContext() {
     return require('../node_modules/jspt/lib/jspt/modules/std').module;
 }
-escreveTerminal = function(texto) {
- 	//alert(JSON.stringify(term));
- 	term.push("ola");
-};
