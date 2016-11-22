@@ -24,7 +24,6 @@ jQuery(function($) {
     global.terminal.disable();
 });
 
-
 //REQUIRE MODE PORTUGOL PARA CODEMIRROR
 require('codemirror/mode/portugol/portugol');
 
@@ -43,6 +42,19 @@ var editor = CodeMirror.fromTextArea(document.getElementById("codigo"), {
     mode: "portugol"
 }); 
 
+//idportugol e idaluno do moodle
+var idportugol = document.getElementById("idportugol").getAttribute("value");
+var idaluno = document.getElementById("idaluno").getAttribute("value");
+
+jQuery.ajax({
+    type: "POST",
+    url: 'buscar.php',
+    data: { idportugol: idportugol, idaluno: idaluno}, 
+    success:function(data) {
+        editor.setValue(data);
+    }
+});
+
 jQuery('body').append(editor);
 
 var btn = jQuery('#exec').on('click', function() {
@@ -56,7 +68,7 @@ var btnSalvar = jQuery('#salvar').on('click', function() {
     jQuery.ajax({
         type: "POST",
         url: 'salvar.php',
-        data: { codigo: editor.getValue()}, 
+        data: { codigo: editor.getValue(), idportugol: idportugol, idaluno: idaluno }, 
         success:function(data) {
             alert(data); 
         }
