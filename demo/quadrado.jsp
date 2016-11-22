@@ -12,3 +12,12 @@ função quadrado (n:inteiro) : inteiro
 inicio
 	retorne n*n;
 fim
+
+algoritmo teste;
+variaveis
+	x: inteiro;
+fimvariaveis
+inicio
+	x:=leia();
+    imprima("numero: ", x, " quadrado: ", x*x);
+fim

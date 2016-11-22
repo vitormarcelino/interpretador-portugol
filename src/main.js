@@ -24827,7 +24827,7 @@ parseError: function parseError(str, hash) {
         this.trace(str);
     } else {
         throw new Error(str);
-        global.terminal.echo("Erro: " + str);  
+        global.terminal.error("Erro: " + str);  
     }
 },
 parse: function parse(input) {
@@ -24881,7 +24881,7 @@ parse: function parse(input) {
                 }
                 if (this.lexer.showPosition) {
                     //errStr = 'Parse error on line ' + (yylineno + 1) + ':\n' + this.lexer.showPosition() + '\nExpecting ' + expected.join(', ') + ', got \'' + (this.terminals_[symbol] || symbol) + '\'';
-                    global.terminal.echo('Erro de sintaxe na linha ' + (yylineno + 1) + ':\n' + this.lexer.showPosition() + '\nEsperado: ' + expected.join(', ') + ', got \'' + (this.terminals_[symbol] || symbol) + '\'');  
+                    global.terminal.error('Erro de sintaxe na linha ' + (yylineno + 1) + ':\n' + this.lexer.showPosition() + '\nEsperado: ' + expected.join(', ') + ', got \'' + (this.terminals_[symbol] || symbol) + '\'');  
                 } else {
                     errStr = 'Parse error on line ' + (yylineno + 1) + ': Unexpected ' + (symbol == EOF ? 'end of input' : '\'' + (this.terminals_[symbol] || symbol) + '\'');
                     //global.terminal.echo('Error2'); 
@@ -25215,6 +25215,7 @@ next:function () {
         if (this._input === "") {
             return this.EOF;
         } else {
+            global.terminal.error('Erro léxico na linha ' + (this.yylineno + 1) + '. Texto não reconhecido.\n' + this.showPosition());
             return this.parseError('Lexical error on line ' + (this.yylineno + 1) + '. Unrecognized text.\n' + this.showPosition(), {
                 text: "",
                 token: null,
@@ -25802,7 +25803,13 @@ var Context = require('../context').context,
     std = new Context();
 
 std.setFunction('leia', function () {
-	return prompt();
+	return prompt("Insira o valor da variavel:");
+    //return global.terminal.read();
+	//global.terminal.insert("4");
+	//return global.terminal.get_command();
+    //var c;
+    //return JSON.stringify(global.terminal.push());
+    
 });
 
 std.setFunction('imprima', function () {
@@ -25811,8 +25818,6 @@ std.setFunction('imprima', function () {
         global.terminal.echo(args.join(''));  
     }
 });
-
-
 
 exports.module = std;
 
@@ -25831,17 +25836,24 @@ global.jQuery = require('jquery');
 
 //TERMINAL
 global.terminal = null;
+global.controle = 0;
+global.valor = null;
 require('jquery.terminal');
 jQuery(function($) {
     global.terminal = $('#term_demo').terminal(function(command, term) {
       //FUNÇÕES DO TERMINAL
+      global.controle = 1;
+      global.valor = command;
+      //alert(global.valor);
     }, {
         greetings: '',
         name: 'portugol',
         height: 200,
-        prompt: '$ ' 
+        prompt: '' 
     });
+    global.terminal.disable();
 });
+
 
 //REQUIRE MODE PORTUGOL PARA CODEMIRROR
 require('codemirror/mode/portugol/portugol');
@@ -25854,11 +25866,11 @@ var jspt = require('jspt');
 var CodeMirror = require('codemirror/lib/codemirror');
 
 var editor = CodeMirror.fromTextArea(document.getElementById("codigo"), {
-  lineNumbers: false,
-  readOnly: false,
-  lineNumbers: true,
-  theme: 'eclipse',
-  mode: "portugol"
+    lineNumbers: false,
+    readOnly: false,
+    lineNumbers: true,
+    theme: 'eclipse',
+    mode: "portugol"
 }); 
 
 jQuery('body').append(editor);
@@ -25867,7 +25879,18 @@ var btn = jQuery('#exec').on('click', function() {
 	//LIMPA O TERMINAL
 	global.terminal.clear();
 	var codigo = editor.getValue();
-  jspt.execute(codigo, createContext());
+    jspt.execute(codigo, createContext());
+});
+
+var btnSalvar = jQuery('#salvar').on('click', function() {
+    jQuery.ajax({
+        type: "POST",
+        url: 'salvar.php',
+        data: { codigo: editor.getValue()}, 
+        success:function(data) {
+            alert(data); 
+        }
+    });
 });
 
 //FUNÇÃO CRIAR CONTEXTO PARA A EXECUÇÃO
