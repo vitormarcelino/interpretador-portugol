@@ -25594,6 +25594,7 @@ Interpreter.prototype = {
         }
 
         if (fnNode.name == 'NativeFunction') {
+            //alert(JSON.stringify(args));
             ret = this.visit(fnNode.execute(args));
         } else {
             ret = this.visit(fnNode.body, fnContext);
@@ -25701,11 +25702,11 @@ Interpreter.prototype = {
         var left = this.visit(node.left, context);
         var right = this.visit(node.right, context);
 
-        //Type Check
-        if (left.type != right.type) {
-            global.terminal.error('Erro de Tipagem: Expressão entre tipos diferentes: ' + left.type + ' e ' + right.type);
-            throw new Error('Erro de Tipagem: Expressão entre tipos diferentes: ' + left.type + ' e ' + right.type);
-        }
+        //Type Check RESOLVIDO
+        //if (left.type != right.type) {
+            //global.terminal.error('Erro de Tipagem: Expressão entre tipos diferentes: ' + left.type + ' e ' + right.type);
+            //throw new Error('Erro de Tipagem: Expressão entre tipos diferentes: ' + left.type + ' e ' + right.type);
+        //}
 
         //TODO: Handle non numeric types
         //TODO: Handle real/inteiro conversions
@@ -25874,7 +25875,9 @@ Imprima.setBody(function (text) {
 });
 std.setFunction('imprima', Imprima);
 
-Imprima.getInfo();
+//Imprima.getInfo();
+
+//LEIA
 
 exports.module = std;
 
