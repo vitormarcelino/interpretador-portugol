@@ -25573,6 +25573,7 @@ Interpreter.prototype = {
 
         for (var i=0; i<node.args.length; i++) {
             args[i] = this.visit(node.args[i], context);
+            args[i].type = "literal"; //CORRIGE O PROBLEMA DA TIPAGEM AO IMPRIMIR
 
             item = fn.value.params[i];
 
@@ -25594,12 +25595,18 @@ Interpreter.prototype = {
         }
 
         if (fnNode.name == 'NativeFunction') {
-            //alert(JSON.stringify(args));
+            //alert("CONTEXT: " + JSON.stringify(fnContext));
+            fnNode.type = 'literal'; //tem que receber o tipo correto
             ret = this.visit(fnNode.execute(args));
+            if (fnNode.id == 'leia') {
+                //global.terminal.error('teste: ' + fnNode.type + '. Encontrado: ' + ret.type);
+                alert(JSON.stringify(ret));
+            }
+            
         } else {
             ret = this.visit(fnNode.body, fnContext);
         }
-
+        
         if (ret.type != fnNode.type) {
             global.terminal.error('Erro de Tipagem: Função retorna tipo errado. Declarado: ' + fnNode.type + '. Encontrado: ' + ret.type);
             throw new Error('Erro de Tipagem: Função retorna tipo errado. Declarado: ' + fnNode.type + '. Encontrado: ' + ret.type);
@@ -25694,7 +25701,7 @@ Interpreter.prototype = {
             return left < right;
         } else if (node.operator == '<=') {
             return left <= right;
-        } 
+        }   
         global.terminal.error('Operador Inválido: ' + node.operator);
         throw new Error('Operador Inválido: ' + node.operator);
     },
@@ -25703,10 +25710,10 @@ Interpreter.prototype = {
         var right = this.visit(node.right, context);
 
         //Type Check RESOLVIDO
-        //if (left.type != right.type) {
-            //global.terminal.error('Erro de Tipagem: Expressão entre tipos diferentes: ' + left.type + ' e ' + right.type);
-            //throw new Error('Erro de Tipagem: Expressão entre tipos diferentes: ' + left.type + ' e ' + right.type);
-        //}
+        // if (left.type != right.type) {
+        //     global.terminal.error('Erro de Tipagem: Expressão entre tipos diferentes: ' + left.type + ' e ' + right.type);
+        //     throw new Error('Erro de Tipagem: Expressão entre tipos diferentes: ' + left.type + ' e ' + right.type);
+        // }
 
         //TODO: Handle non numeric types
         //TODO: Handle real/inteiro conversions
@@ -25877,7 +25884,16 @@ std.setFunction('imprima', Imprima);
 
 //Imprima.getInfo();
 
-//LEIA
+// //LEIA
+var Leia = new NativeFunction('leia', 'inteiro');
+
+Leia.setBody(function () {
+	var ret = prompt("Insira o valor:");
+	return ret;
+});
+std.setFunction('leia', Leia);
+
+//Leia.getInfo();
 
 exports.module = std;
 
@@ -25917,6 +25933,7 @@ NativeFunction.prototype.setBody = function (fn) {
 
 NativeFunction.prototype.execute = function (args) {
     var values = [];
+    //alert(this.type + " - " +typeRet);
 
     for (var i=0; i<args.length; i++) {
         values[i] = args[i].value;
