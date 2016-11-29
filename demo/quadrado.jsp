@@ -19,5 +19,5 @@ variaveis
 fimvariaveis
 inicio
 	x:=leia();
-    imprima("numero: ", x, " quadrado: ", x*x);
+    imprima("numero: "+ x + " quadrado: " + x*x);
 fim

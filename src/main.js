@@ -24082,6 +24082,7 @@ return jQuery;
 }));
 
 },{}],6:[function(require,module,exports){
+(function (global){
 /**
  * Javascript Portugol
  * https://github.com/moacir/jspt
@@ -24117,7 +24118,8 @@ var AST = {
         this.name = 'AssignmentExpression';
         this.operator = operator;
         this.left = left;
-        this.right = right; 
+        this.right = right;
+        global.left = left;
     },
     UnaryExpressionNode: function (operator, argument) {
         this.name = 'UnaryExpression';
@@ -24234,6 +24236,7 @@ AST.Util = {
 
 exports.ast = AST;
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],7:[function(require,module,exports){
 /**
  * Javascript Portugol
@@ -25494,6 +25497,7 @@ Interpreter.prototype = {
         var method = 'visit' + node.name + 'Node';
 
         if (this[method] === undefined) {
+            global.terminal.error('Invalid Node: ' + node.name);
             throw new Error('Invalid Node: ' + node.name);
         }
 
@@ -25524,6 +25528,10 @@ Interpreter.prototype = {
     visitAssignmentExpressionNode: function (node, context) {
         var ident = this.visit(node.left, context),
             right = this.visit(node.right, context);
+        // right.type = ident.type;
+        // alert ("IDENT :" + JSON.stringify(ident));
+        // alert ("RIGHT :" + JSON.stringify(right));
+
 
         if (ident.type != right.type) {
             global.terminal.error('Erro de Tipagem: Variável do tipo: ' + ident.type + '. Encontrado: ' + right.type);
@@ -25595,14 +25603,15 @@ Interpreter.prototype = {
         }
 
         if (fnNode.name == 'NativeFunction') {
-            //alert("CONTEXT: " + JSON.stringify(fnContext));
-            fnNode.type = 'literal'; //tem que receber o tipo correto
-            ret = this.visit(fnNode.execute(args));
+            var esperado = this.visit(global.left, context);
+            fnNode.type = esperado.type; //altera o tipo do nó para o tipo esperado 
+
             if (fnNode.id == 'leia') {
-                //global.terminal.error('teste: ' + fnNode.type + '. Encontrado: ' + ret.type);
-                alert(JSON.stringify(ret));
+                ret = this.visit(fnNode.execute(args)); //ONDE É EXECUTADO O LEIA  alert(JSON.stringify(ret));
+            } else {
+                ret = this.visit(fnNode.execute(args)); //ONDE É EXECUTADO O IMPRIMA
             }
-            
+
         } else {
             ret = this.visit(fnNode.body, fnContext);
         }
@@ -25749,7 +25758,8 @@ Interpreter.prototype = {
             node.value = parseFloat(node.value);
         } else if (node.type == 'literal') {
             var str = node.value || '""';
-            node.value = str.substr(1, str.length-2); //remove trailling quotes
+            //node.value = str.substr(1, str.length-2); //remove trailling quotes (original do jspt, usando substr)
+            node.value = str.replace(/["]+/g, ''); //remove as aspas usando expressão regular
         }
 
         return node;
@@ -25886,9 +25896,10 @@ std.setFunction('imprima', Imprima);
 
 // //LEIA
 var Leia = new NativeFunction('leia', 'inteiro');
+Leia.addParameter('text', 'literal');
 
-Leia.setBody(function () {
-	var ret = prompt("Insira o valor:");
+Leia.setBody(function (text) {
+	var ret = prompt(text);
 	return ret;
 });
 std.setFunction('leia', Leia);
