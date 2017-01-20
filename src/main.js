@@ -9135,7 +9135,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 0.10.12
+ *           \/              /____/                              version 0.11.21
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
  *
@@ -9162,7 +9162,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
  * Copyright (c) 2007-2013 Alexandru Marasteanu <hello at alexei dot ro>
  * licensed under 3 clause BSD license
  *
- * Date: Thu, 16 Jun 2016 09:23:57 +0000
+ * Date: Tue, 29 Nov 2016 14:04:08 +0000
  */
 
 /* TODO:
@@ -9814,6 +9814,9 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 return data;
             },
             rotate: function() {
+                if (!data.filter(Boolean).length) {
+                    return;
+                }
                 if (data.length === 1) {
                     return data[0];
                 } else {
@@ -9825,7 +9828,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     if (data[pos]) {
                         return data[pos];
                     } else {
-                        this.rotate();
+                        return this.rotate();
                     }
                 }
             },
@@ -9847,8 +9850,16 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             front: function() {
                 if (data.length) {
                     var index = pos;
-                    while(!data[index]) {
+                    var restart = false;
+                    while (!data[index]) {
                         index++;
+                        if (index > data.length) {
+                            if (restart) {
+                                break;
+                            }
+                            index = 0;
+                            restart = true;
+                        }
                     }
                     return data[index];
                 }
@@ -9864,6 +9875,9 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
     function Stack(init) {
         var data = init instanceof Array ? init : init ? [init] : [];
         $.extend(this, {
+            data: function() {
+                return data;
+            },
             map: function(fn) {
                 return $.map(data, fn);
             },
@@ -9892,82 +9906,22 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         });
     }
     // -------------------------------------------------------------------------
-    // :: Serialize object myself (biwascheme or prototype library do something
-    // :: wicked with JSON serialization for Arrays)
-    // -------------------------------------------------------------------------
-    $.json_stringify = function(object, level) {
-        var result = '', i;
-        level = level === undefined ? 1 : level;
-        var type = typeof object;
-        switch (type) {
-            case 'function':
-                result += object;
-                break;
-            case 'boolean':
-                result += object ? 'true' : 'false';
-                break;
-            case 'object':
-                if (object === null) {
-                    result += 'null';
-                } else if (object instanceof Array) {
-                    result += '[';
-                    var len = object.length;
-                    for (i = 0; i < len - 1; ++i) {
-                        result += $.json_stringify(object[i], level + 1);
-                    }
-                    result += $.json_stringify(object[len - 1], level + 1) + ']';
-                } else {
-                    result += '{';
-                    for (var property in object) {
-                        if (object.hasOwnProperty(property)) {
-                            result += '"' + property + '":' +
-                                $.json_stringify(object[property], level + 1);
-                        }
-                    }
-                    result += '}';
-                }
-                break;
-            case 'string':
-                var str = object;
-                var repl = {
-                    '\\\\': '\\\\',
-                    '"': '\\"',
-                    '/': '\\/',
-                    '\\n': '\\n',
-                    '\\r': '\\r',
-                    '\\t': '\\t'};
-                for (i in repl) {
-                    if (repl.hasOwnProperty(i)) {
-                        str = str.replace(new RegExp(i, 'g'), repl[i]);
-                    }
-                }
-                result += '"' + str + '"';
-                break;
-            case 'number':
-                result += String(object);
-                break;
-        }
-        result += (level > 1 ? ',' : '');
-        // quick hacks below
-        if (level === 1) {
-            // fix last comma
-            result = result.replace(/,([\]}])/g, '$1');
-        }
-        // fix comma before array or object
-        return result.replace(/([\[{]),/g, '$1');
-    };
-    // -------------------------------------------------------------------------
     // :: HISTORY CLASS
     // -------------------------------------------------------------------------
-    function History(name, size) {
+    function History(name, size, memory) {
         var enabled = true;
         var storage_key = '';
         if (typeof name === 'string' && name !== '') {
             storage_key = name + '_';
         }
         storage_key += 'commands';
-        var data = $.Storage.get(storage_key);
-        data = data ? $.parseJSON(data) : [];
+        var data;
+        if (memory) {
+            data = [];
+        } else {
+            data = $.Storage.get(storage_key);
+            data = data ? $.parseJSON(data) : [];
+        }
         var pos = data.length-1;
         $.extend(this, {
             append: function(item) {
@@ -9978,7 +9932,9 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                             data = data.slice(-size);
                         }
                         pos = data.length-1;
-                        $.Storage.set(storage_key, $.json_stringify(data));
+                        if (!memory) {
+                            $.Storage.set(storage_key, JSON.stringify(data));
+                        }
                     }
                 }
             },
@@ -9989,7 +9945,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 pos = data.length-1;
             },
             last: function() {
-                return data[length-1];
+                return data[data.length-1];
             },
             end: function() {
                 return pos === data.length-1;
@@ -10028,7 +9984,9 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 enabled = true;
             },
             purge: function() {
-                $.Storage.remove(storage_key);
+                if (!memory) {
+                    $.Storage.remove(storage_key);
+                }
             },
             disable: function() {
                 enabled = false;
@@ -10057,7 +10015,13 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         // on mobile the only way to hide textarea on desktop it's needed because
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
-        var clip = $('<textarea />').addClass('clipboard').appendTo(self);
+        var clip = $('<textarea>').attr({
+            autocapitalize: 'off',
+            spellcheck: 'false'
+        }).addClass('clipboard').appendTo(self);
+        // we don't need this but leave it as a comment just in case
+        //var contentEditable = $('<div contentEditable></div>')
+        //$(document.body).append(contentEditable);
         if (options.width) {
             self.width(options.width);
         }
@@ -10081,36 +10045,36 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         var name, history;
         var cursor = self.find('.cursor');
         var animation;
+        var paste_count = 0;
         function mobile_focus() {
-            if (is_touch) {
-                var focus = clip.is(':focus');
-                if (enabled) {
-                    if (!focus) {
+            //if (is_touch) {
+            var focus = clip.is(':focus');
+            if (enabled) {
+                if (!focus) {
+                    clip.focus();
+                    self.oneTime(10, function() {
                         clip.focus();
-                        self.oneTime(10, function() {
-                            clip.focus();
-                        });
-                    }
-                } else {
-                    if (focus) {
-                        clip.blur();
-                    }
+                    });
+                }
+            } else {
+                if (focus) {
+                    clip.blur();
                 }
             }
         }
         // on mobile you can't delete character if input is empty (event
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
-        function fake_mobile_entry() {
-            if (is_touch) {
-                // delay worked while experimenting
-                self.oneTime(10, function() {
-                    clip.val(command);
-                    self.oneTime(10, function() {
-                        clip.caret(position);
-                    });
-                });
-            }
+        function fix_textarea() {
+            // delay worked while experimenting
+            self.oneTime(10, function () {
+                clip.val(command);
+				if (enabled) {
+					self.oneTime(10, function () {
+						clip.caret(position);
+					});
+				}
+            });
         }
         // terminal animation don't work on andorid because they animate
         // 2 properties
@@ -10127,12 +10091,12 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             animation = function(toggle) {
                 if (toggle && !animating) {
                     animating = true;
-                    cursor.addClass('inverted');
+                    cursor.addClass('inverted blink');
                     self.everyTime(500, 'blink', blink);
                 } else if (animating && !toggle) {
                     animating = false;
                     self.stopTime('blink', blink);
-                    cursor.removeClass('inverted');
+                    cursor.removeClass('inverted blink');
                 }
             };
         }
@@ -10196,7 +10160,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         // ---------------------------------------------------------------------
         function change_num_chars() {
             var W = self.width();
-            var w = cursor.width();
+            var w = cursor[0].getBoundingClientRect().width;
             num_chars = Math.floor(W / w);
         }
         // ---------------------------------------------------------------------
@@ -10431,30 +10395,23 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         // :: Paste content to terminal using hidden textarea
         // ---------------------------------------------------------------------
         function paste(e) {
-            e = e.originalEvent;
+            if (paste_count++ > 0) {
+                return;
+            }
+            if (e.originalEvent) {
+                e = e.originalEvent;
+            }
             if (self.isenabled()) {
                 var clip = self.find('textarea');
                 if (!clip.is(':focus')) {
                     clip.focus();
                 }
-                var text;
-                if (window.clipboardData && window.clipboardData.getData) { // IE
-                    text = window.clipboardData.getData('Text');
-                } else if (e.clipboardData && e.clipboardData.getData) {
-                    text = e.clipboardData.getData('text/plain');
-                } else {
-                    //wait until Browser insert text to textarea
-                    cmd.oneTime(100, function() {
-                        self.insert(clip.val());
-                        clip.val('');
-                        fake_mobile_entry();
-                    });
-                }
-                if (text) {
-                    self.insert(text);
+                //wait until Browser insert text to textarea
+                self.oneTime(100, function() {
+                    self.insert(clip.val());
                     clip.val('');
-                    fake_mobile_entry();
-                }
+                    fix_textarea();
+                });
             }
         }
         var first_up_history = true;
@@ -10526,6 +10483,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                         if ($.isFunction(prompt)) {
                             draw_prompt();
                         }
+                        $('.clipboard').val('');
                     }
                 } else if (e.which === 8) { //backspace
                     if (reverse_search) {
@@ -10648,8 +10606,9 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     self.position(command.length);
                 } else if (e.shiftKey && e.which == 45) { // Shift+Insert
                     clip.val(''); // so we get it before paste event
+                    paste_count = 0;
                     if (!is_paste_supported) {
-                        paste();
+                        paste(e);
                     } else {
                         clip.focus();
                     }
@@ -10700,12 +10659,17 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                             if (kill_text !== '') {
                                 self.insert(kill_text);
                             }
-                        } else if (e.which === 86) { // CTRL+V
+                        } else if (e.which === 86 || e.which === 118) { // CTRL+V
                             clip.val('');
+                            paste_count = 0;
                             if (!is_paste_supported) {
-                                paste();
+                                paste(e);
                             } else {
                                 clip.focus();
+                                clip.on('input', function input(e) {
+                                    paste(e);
+                                    clip.off('input', input);
+                                });
                             }
                             return;
                         } else if (e.which === 75) { // CTRL+K
@@ -10741,7 +10705,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 if (string !== undefined) {
                     name = string;
                     var enabled = history && history.enabled() || !history;
-                    history = new History(string, historySize);
+                    history = new History(string, historySize, options.history == 'memory');
                     // disable new history if old was disabled
                     if (!enabled) {
                         history.disable();
@@ -10784,7 +10748,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     }
                 }
                 redraw();
-                fake_mobile_entry();
+                fix_textarea();
                 return removed;
             },
             set: function(string, stay) {
@@ -10794,7 +10758,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                         self.position(command.length);
                     }
                     redraw();
-                    fake_mobile_entry();
+                    fix_textarea();
                     fire_change_command();
                 }
                 return self;
@@ -10811,7 +10775,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 if (!stay) {
                     self.position(string.length, true);
                 } else {
-                    fake_mobile_entry();
+                    fix_textarea();
                 }
                 redraw();
                 fire_change_command();
@@ -10878,7 +10842,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                         options.onPositionChange(position);
                     }
                     redraw();
-                    fake_mobile_entry();
+                    fix_textarea();
                     return self;
                 } else {
                     return position;
@@ -10912,6 +10876,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             enable: function() {
                 enabled = true;
                 self.addClass('enabled');
+				clip.caret(position);
                 animation(true);
                 mobile_focus();
                 return self;
@@ -10955,7 +10920,8 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         function keypress_event(e) {
             var result;
             no_keypress = false;
-            if (e.ctrlKey && e.which === 99) { // CTRL+C
+            if ((e.ctrlKey || e.metaKey) && ([99, 118, 86].indexOf(e.which) !== -1)) {
+                // CTRL+C or CTRL+V
                 return;
             }
             if (prevent_keypress) {
@@ -11001,9 +10967,6 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         }
         doc.bind('keypress.cmd', keypress_event).bind('keydown.cmd', keydown_event).
             bind('input.cmd', input);
-        if (is_paste_supported) {
-            doc.bind('paste.cmd', paste);
-        }
         // characters
         self.data('cmd', self);
         return self;
@@ -11025,11 +10988,11 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
     // css-animations-in-javascript/
     var support_animations = (function() {
         var animation = false,
-        animationstring = 'animation',
-        keyframeprefix = '',
-        domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
-        pfx  = '',
-        elm = document.createElement('div');
+            animationstring = 'animation',
+            keyframeprefix = '',
+            domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
+            pfx  = '',
+            elm = document.createElement('div');
         if (elm.style.animationName) { animation = true; }
         if (animation === false) {
             for (var i = 0; i < domPrefixes.length; i++) {
@@ -11092,7 +11055,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
     var format_last_re = /\[\[[!gbiuso]*;[^;]*;[^\]]*\]?$/i;
     var format_exec_re = /(\[\[(?:[^\]]|\\\])*\]\])/;
     $.terminal = {
-        version: '0.10.12',
+        version: '0.11.21',
         // colors from http://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'black', 'silver', 'gray', 'white', 'maroon', 'red', 'purple',
@@ -11323,6 +11286,11 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     if (text === '') {
                         return text;
                     } else if ($.terminal.is_formatting(text)) {
+                        // fix &nbsp; inside formatting because encode is called
+                        // before format
+                        text = text.replace(/\[\[[^\]]+\]/, function(text) {
+                            return text.replace(/&nbsp;/g, ' ');
+                        });
                         return text.replace(format_parts_re, function(s,
                                                                       style,
                                                                       color,
@@ -11381,10 +11349,10 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                                     }
                                 }
                             } else {
-                                result = '<span ';
+                                result = '<span';
                             }
                             if (style_str !== '') {
-                                result += 'style="' + style_str + '"';
+                                result += ' style="' + style_str + '"';
                             }
                             if (_class !== '') {
                                 result += ' class="' + _class + '"';
@@ -11424,6 +11392,13 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         // ---------------------------------------------------------------------
         active: function() {
             return terminals.front();
+        },
+        // implmentation detail id is always length of terminals Cycle
+        last_id: function() {
+            var len = terminals.length();
+            if (len) {
+                return len - 1;
+            }
         },
         // keep old as backward compatible
         parseArguments: function(string) {
@@ -11536,7 +11511,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
     var ids = {}; // list of url based id of JSON-RPC
     $.jrpc = function(url, method, params, success, error) {
         ids[url] = ids[url] || 0;
-        var request = $.json_stringify({
+        var request = JSON.stringify({
            'jsonrpc': '2.0', 'method': method,
             'params': params, 'id': ++ids[url]});
         return $.ajax({
@@ -11544,8 +11519,8 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             data: request,
             success: function(result, status, jqXHR) {
                 var content_type = jqXHR.getResponseHeader('Content-Type');
-                if (!content_type.match(/application\/json/)) {
-                    var msg = 'Response Content-Type is not application/json';
+                if (!content_type.match(/(application|text)\/json/)) {
+                    var msg = 'Response Content-Type is neither application/json nor text/json';
                     if (console && console.warn) {
                         console.warn(msg);
                     } else {
@@ -11574,8 +11549,8 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             //timeout: 1,
             type: 'POST'});
     };
-
     // -----------------------------------------------------------------------
+    /*
     function is_scrolled_into_view(elem) {
         var docViewTop = $(window).scrollTop();
         var docViewBottom = docViewTop + $(window).height();
@@ -11585,6 +11560,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
 
         return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom));
     }
+    */
     // -----------------------------------------------------------------------
     // :: Create fake terminal to calcualte the dimention of one character
     // :: this will make terminal work if terminal div is not added to the
@@ -11606,17 +11582,10 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal) {
-        var temp = $('<div class="terminal"><span class="cursor">' +
-                     '</span></div>').appendTo('body').css('padding', 0);
+        var temp = $('<div class="terminal wrap"><span class="cursor">' +
+                     '&nbsp;</span></div>').appendTo('body').css('padding', 0);
         var span = temp.find('span');
-        // use more characters to get width of single character as a fraction
-        var max = 60;
-        var spaces = '';
-        for (var i=0;i<=max; ++i) {
-            spaces += '&nbsp;';
-        }
-        span.html(spaces);
-        var width = span.width()/max;
+        var width = span[0].getBoundingClientRect().width;
         var result = Math.floor(terminal.width() / width);
         temp.remove();
         if (have_scrollbars(terminal)) {
@@ -11685,7 +11654,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
          '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
          ' __ / / // / // / _  / _/ // / / / _  / _/     / /  \\/ / _ \\/ /',
          '/  / / // / // / ___/ // // / / / ___/ // / / / / /\\  / // / /__',
-         '\\___/____ \\\\__/____/_/ \\__ / /_/____/_//_/ /_/ /_/  \\/\\__\\_\\___/',
+         '\\___/____ \\\\__/____/_/ \\__ / /_/____/_//_/_/_/ /_/  \\/\\__\\_\\___/',
          '         \\/          /____/                                   '.replace(reg, ' ') +
          version_string,
          copyright],
@@ -11709,9 +11678,11 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         enabled: true,
         historySize: 60,
         maskChar: '*',
+        wrap: true,
         checkArity: true,
         raw: false,
         exceptionHandler: null,
+        memory: false,
         cancelableAjax: true,
         processArguments: true,
         linksNoReferrer: false,
@@ -11719,6 +11690,8 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         Token: true, // where this came from?
         convertLinks: true,
         historyState: false,
+        echoCommand: true,
+        scrollOnEcho: true,
         login: null,
         outputLimit: -1,
         formatters: [],
@@ -11765,7 +11738,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
     // :: All terminal globals
     // -------------------------------------------------------------------------
     var requests = []; // for canceling on CTRL+D
-    var terminals = window.terminals = new Cycle(); // list of terminals global in this scope
+    var terminals = new Cycle(); // list of terminals global in this scope
     // state for all terminals, terminals can't have own array fo state because
     // there is only one popstate event
     var save_state = []; // hold objects returned by export_view by history API
@@ -11773,7 +11746,34 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
     var change_hash = false; // don't change hash on Init
     var fire_hash_change = true;
     var first_instance = true; // used by history state
+    var last_id;
     $.fn.terminal = function(init_interpreter, options) {
+        function StorageHelper(memory) {
+            if (memory) {
+                this.storage = {};
+            }
+            this.set = function(key, value) {
+                if (memory) {
+                    this.storage[key] = value;
+                } else {
+                    $.Storage.set(key, value);
+                }
+            };
+            this.get = function(key) {
+                if (memory) {
+                    return this.storage[key];
+                } else {
+                    return $.Storage.get(key);
+                }
+            };
+            this.remove = function(key) {
+                if (memory) {
+                    delete this.storage[key];
+                } else {
+                    $.Storage.remove(key);
+                }
+            };
+        }
         // ---------------------------------------------------------------------
         // :: helper function
         // ---------------------------------------------------------------------
@@ -11794,10 +11794,10 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 self.echo(object);
             } else if (object instanceof Array) {
                 self.echo($.map(object, function(object) {
-                    return $.json_stringify(object);
+                    return JSON.stringify(object);
                 }).join(' '));
             } else if (typeof object === 'object') {
-                self.echo($.json_stringify(object));
+                self.echo(JSON.stringify(object));
             } else {
                 self.echo(object);
             }
@@ -11834,6 +11834,18 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 settings.onRPCError.call(self, error);
             } else {
                 self.error('&#91;RPC&#93; ' + error.message);
+                if (error.error && error.error.message) {
+                    error = error.error;
+                    // more detailed error message
+                    var msg = '\t' + error.message;
+                    if (error.file) {
+                        msg += ' in file "' + error.file.replace(/.*\//, '') + '"';
+                    }
+                    if (error.at) {
+                        msg += ' at line ' + error.at;
+                    }
+                    self.error(msg);
+                }
             }
         }
         // ---------------------------------------------------------------------
@@ -11995,13 +12007,53 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                                     if (json.error) {
                                         display_json_rpc_error(json.error);
                                     } else {
-                                        display_object(json.result);
+                                        if ($.isFunction(settings.processRPCResponse)) {
+                                            settings.processRPCResponse.call(self,
+                                                                             json.result,
+                                                                             self);
+                                        } else {
+                                            display_object(json.result);
+                                        }
                                     }
                                     self.resume();
                                 }, ajax_error);
                             }
                         };
                     });
+                    interpreter_object.help = interpreter_object.help || function(fn) {
+                        if (typeof fn == 'undefined') {
+                            self.echo('Available commands: ' + ret.procs.map(function(proc) {
+                                return proc.name;
+                            }).join(', ') + ', help');
+                        } else {
+                            var found = false;
+                            $.each(ret.procs, function(_, proc) {
+                                if (proc.name == fn) {
+                                    found = true;
+                                    var msg = '';
+                                    msg += '[[bu;#fff;]' + proc.name + ']';
+                                    if (proc.params) {
+                                        msg += ' ' + proc.params.join(' ');
+                                    }
+                                    if (proc.help) {
+                                        msg += '\n' + proc.help;
+                                    }
+                                    self.echo(msg);
+                                    return false;
+                                }
+                            });
+                            if (!found) {
+                                if (fn == 'help') {
+                                    self.echo('[[bu;#fff;]help] [method]\ndisplay help ' +
+                                              'for the method or list of methods if not'+
+                                              ' specified');
+                                } else {
+                                    var msg = 'Method `' + fn.toString() + '\' not found ';//'
+                                    self.error(msg);
+                                }
+                            }
+                        }
+                    };
                     success(interpreter_object);
                 } else {
                     success(null);
@@ -12014,11 +12066,12 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         function make_interpreter(user_intrp, login, finalize) {
             finalize = finalize || $.noop;
             var type = $.type(user_intrp);
+            var object;
             var result = {};
             var rpc_count = 0; // only one rpc can be use for array
             var fn_interpreter;
             if (type === 'array') {
-                var object = {};
+                object = {};
                 // recur will be called when previous acync call is finished
                 (function recur(interpreters, success) {
                     if (interpreters.length) {
@@ -12071,10 +12124,13 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 });
             } else if (type === 'string') {
                 if (settings.ignoreSystemDescribe) {
-                    finalize({
-                        interpreter: make_basic_json_rpc(user_intrp, login),
-                        completion: settings.completion
-                    });
+                    object = {
+                        interpreter: make_basic_json_rpc(user_intrp, login)
+                    };
+                    if ($.isArray(settings.completion)) {
+                        object.completion = settings.completion;
+                    }
+                    finalize(object);
                 } else {
                     self.pause();
                     make_json_rpc_object(user_intrp, login, function(object) {
@@ -12086,7 +12142,6 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                         } else {
                             // no procs in system.describe
                             result.interpreter = make_basic_json_rpc(user_intrp, login);
-                            result.completion = settings.completion;
                         }
                         finalize(result);
                         self.resume();
@@ -12197,7 +12252,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         var NEW_LINE = 1;
         function buffer_line(string, options) {
             // urls should always have formatting to keep url if split
-            if (settings.convertLinks) {
+            if (settings.convertLinks && !options.raw) {
                 string = string.replace(email_re, '[[!;;]$1]').
                     replace(url_nf_re, '[[!;;]$1]');
             }
@@ -12223,7 +12278,9 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             }
             output_buffer.push(NEW_LINE);
             if (!options.raw && (string.length > num_chars ||
-                                       string.match(/\n/))) {
+                                       string.match(/\n/)) &&
+                ((settings.wrap === true && options.wrap === undefined) ||
+                  settings.wrap === false && options.wrap === true)) {
                 var words = options.keepWords;
                 var array = $.terminal.split_equal(string, num_chars, words);
                 for (i = 0, len = array.length; i < len; ++i) {
@@ -12239,12 +12296,14 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                         }
                     }
                 }
+            } else if (!options.raw) {
+                string = $.terminal.format(string, {
+                    linksNoReferrer: settings.linksNoReferrer
+                });
+                string.split(/\n/).forEach(function(string) {
+                    output_buffer.push(string);
+                });
             } else {
-                if (!options.raw) {
-                    string = $.terminal.format(string, {
-                        linksNoReferrer: settings.linksNoReferrer
-                    });
-                }
                 output_buffer.push(string);
             }
             output_buffer.push(options.finalize);
@@ -12404,7 +12463,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         function maybe_update_hash() {
             if (change_hash) {
                 fire_hash_change = false;
-                location.hash = $.json_stringify(hash_commands);
+                location.hash = '#' + JSON.stringify(hash_commands);
                 setTimeout(function() {
                     fire_hash_change = true;
                 }, 100);
@@ -12461,14 +12520,14 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 if (!ghost()) {
                     // exec execute this function wihout the help of cmd plugin
                     // that add command to history on enter
-                    if (exec && $.isFunction(settings.historyFilter) &&
-                        settings.historyFilter(command) ||
-                        command.match(settings.historyFilter)) {
+                    if (exec && ($.isFunction(settings.historyFilter) &&
+                                 settings.historyFilter(command) ||
+                                 command.match(settings.historyFilter))) {
                         command_line.history().append(command);
                     }
                 }
                 var interpreter = interpreters.top();
-                if (!silent) {
+                if (!silent && settings.echoCommand) {
                     echo_command(command);
                 }
                 // new promise will be returned to exec that will resolve his
@@ -12505,7 +12564,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     var result = interpreter.interpreter.call(self, command, self);
                     if (result !== undefined) {
                         // auto pause/resume when user return promises
-                        self.pause();
+                        self.pause(true);
                         return $.when(result).then(function(result) {
                             // don't echo result if user echo something
                             if (result && position === lines.length-1) {
@@ -12544,7 +12603,6 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     }
                 } catch (e) {
                     display_exception(e, 'onBeforeLogout');
-                    throw e;
                 }
             }
             clear_loging_storage();
@@ -12553,7 +12611,6 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     settings.onAfterLogout(self);
                 } catch (e) {
                     display_exception(e, 'onAfterlogout');
-                    throw e;
                 }
             }
             self.login(settings.login, true, initialize);
@@ -12561,15 +12618,15 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         // ---------------------------------------------------------------------
         function clear_loging_storage() {
             var name = self.prefix_name(true) + '_';
-            $.Storage.remove(name + 'token');
-            $.Storage.remove(name + 'login');
+            storage.remove(name + 'token');
+            storage.remove(name + 'login');
         }
         // ---------------------------------------------------------------------
         // :: Save the interpreter name for use with purge
         // ---------------------------------------------------------------------
         function maybe_append_name(interpreter_name) {
             var storage_key = self.prefix_name() + '_interpreters';
-            var names = $.Storage.get(storage_key);
+            var names = storage.get(storage_key);
             if (names) {
                 names = $.parseJSON(names);
             } else {
@@ -12577,7 +12634,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             }
             if ($.inArray(interpreter_name, names) == -1) {
                 names.push(interpreter_name);
-                $.Storage.set(storage_key, $.json_stringify(names));
+                storage.set(storage_key, JSON.stringify(names));
             }
         }
         // ---------------------------------------------------------------------
@@ -12719,7 +12776,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         function key_down(e) {
             // Prevent to be executed by cmd: CTRL+D, TAB, CTRL+TAB (if more
             // then one terminal)
-            var result, i, top = interpreters.top();
+            var result, i, top = interpreters.top(), completion;
             if (!self.paused() && self.enabled()) {
                 if ($.isFunction(top.keydown)) {
                     result = top.keydown(e, self);
@@ -12732,13 +12789,15 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                         return result;
                     }
                 }
-                var completion;
-                if ((settings.completion &&
-                     $.type(settings.completion) != 'boolean') &&
+                if (settings.completion &&
+                    $.type(settings.completion) != 'boolean' &&
                     top.completion === undefined) {
                     completion = settings.completion;
                 } else {
                     completion = top.completion;
+                }
+                if (completion == 'settings') {
+                    completion = settings.completion;
                 }
                 // after text pasted into textarea in cmd plugin
                 self.oneTime(10, function() {
@@ -12773,16 +12832,16 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     // so we need to get the text before the cursor
                     var pos = command_line.position();
                     var command = command_line.get().substring(0, pos);
-                    var strings = command.split(' ');
+                    var cmd_strings = command.split(' ');
                     var string; // string before cursor that will be completed
                     if (strings.length == 1) {
-                        string = strings[0];
+                        string = cmd_strings[0];
                     } else {
-                        string = strings[strings.length-1];
-                        for (i=strings.length-1; i>0; i--) {
+                        string = cmd_strings[cmd_strings.length-1];
+                        for (i=cmd_strings.length-1; i>0; i--) {
                             // treat escape space as part of the string
-                            if (strings[i-1][strings[i-1].length-1] == '\\') {
-                                string = strings[i-1] + ' ' + string;
+                            if (cmd_strings[i-1][cmd_strings[i-1].length-1] == '\\') {
+                                string = cmd_strings[i-1] + ' ' + string;
                             } else {
                                 break;
                             }
@@ -12802,7 +12861,8 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                             throw new Error(strings.invalidCompletion);
                     }
                     return false;
-                } else if (e.which === 86 && e.ctrlKey) { // CTRL+V
+                } else if ((e.which === 118 || e.which === 86) &&
+                           (e.ctrlKey || e.metaKey)) { // CTRL+V
                     self.oneTime(1, function() {
                         scroll_to_bottom();
                     });
@@ -12854,7 +12914,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         if (self.length === 0) {
             throw sprintf($.terminal.defaults.strings.invalidSelector, self.selector);
         }
-        //var names = []; // stack if interpeter names
+        //var names = []; // stack if interpreter names
         var scroll_object;
         var prev_command; // used for name on the terminal if not defined
         var loged_in = false;
@@ -12871,6 +12931,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         var command_list = []; // for tab completion
         var url;
         var logins = new Stack(); // stack of logins
+        var init_deferr = $.Deferred();
         var in_login = false;//some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;//used to indicate that user call pause onInit
@@ -12880,9 +12941,11 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                                 $.terminal.defaults,
                                 {name: self.selector},
                                 options || {});
+        var storage = new StorageHelper(settings.memory);
         var strings = $.terminal.defaults.strings;
-        var enabled = settings.enabled, frozen;
+        var enabled = settings.enabled, frozen = false;
         var paused = false;
+        var autologin = true; // set to false of onBeforeLogin return false
         // -----------------------------------------------------------------
         // TERMINAL METHODS
         // -----------------------------------------------------------------
@@ -12900,7 +12963,6 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     settings.onClear(self);
                 } catch (e) {
                     display_exception(e, 'onClear');
-                    throw e;
                 }
                 self.attr({ scrollTop: 0});
                 return self;
@@ -12910,6 +12972,14 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: restore the state
             // -------------------------------------------------------------
             export_view: function() {
+                var user_export = {};
+                if ($.isFunction(settings.onExport)) {
+                    try {
+                        user_export = settings.onExport();
+                    } catch(e) {
+                        display_exception(e, 'onExport');
+                    }
+                }
                 return $.extend({}, {
                     focus: enabled,
                     mask: command_line.mask(),
@@ -12918,7 +12988,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     position: command_line.position(),
                     lines: clone(lines),
                     interpreters: interpreters.clone()
-                }, $.isFunction(settings.onExport) ? settings.onExport() : {});
+                }, user_export);
             },
             // -------------------------------------------------------------
             // :: Restore the state of the previous exported view
@@ -12928,18 +12998,24 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     throw new Error(sprintf(strings.notWhileLogin, 'import_view'));
                 }
                 if ($.isFunction(settings.onImport)) {
-                    settings.onImport(view);
+                    try {
+                        settings.onImport(view);
+                    } catch(e) {
+                        display_exception(e, 'onImport');
+                    }
                 }
-                self.set_prompt(view.prompt);
-                self.set_command(view.command);
-                command_line.position(view.position);
-                command_line.mask(view.mask);
-                if (view.focus) {
-                    self.focus();
-                }
-                lines = clone(view.lines);
-                interpreters = view.interpreters;
-                redraw();
+                init_deferr.then(function() {
+                    self.set_prompt(view.prompt);
+                    self.set_command(view.command);
+                    command_line.position(view.position);
+                    command_line.mask(view.mask);
+                    if (view.focus) {
+                        self.focus();
+                    }
+                    lines = clone(view.lines);
+                    interpreters = view.interpreters;
+                    redraw();
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -12971,23 +13047,36 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: true it will not echo executed command
             // -------------------------------------------------------------
             exec: function(command, silent, deferred) {
-                if ($.isArray(command)) {
-                    return $.when.apply($, $.map(command, function(command) {
-                        return self.exec(command, silent);
-                    }));
-                }
-                // both commands executed here (resume will call Term::exec)
                 var d = deferred || new $.Deferred();
-                if (paused) {
-                    // delay command multiple time
-                    delayed_commands.push([command, silent, d]);
+                function run() {
+                    if ($.isArray(command)) {
+                        (function recur() {
+                            var cmd = command.shift();
+                            if (cmd) {
+                                self.exec(cmd, silent).then(recur);
+                            } else {
+                                d.resolve();
+                            }
+                        })();
+                    } else if (paused) {
+                        // both commands executed here (resume will call Term::exec)
+                        // delay command multiple time
+                        delayed_commands.push([command, silent, d]);
+                    } else {
+                        // commands may return promise from user code
+                        // it will resolve exec promise when user promise
+                        // is resolved
+                        commands(command, silent, true).then(function() {
+                            d.resolve(self);
+                        });
+                    }
+                }
+                // while testing it didn't executed last exec when using this
+                // for resolved deferred
+                if (init_deferr.state() != 'resolved') {
+                    init_deferr.then(run);
                 } else {
-                    // commands may return promise from user code
-                    // it will resolve exec promise when user promise
-                    // is resolved
-                    commands(command, silent, true).then(function() {
-                        d.resolve(self);
-                    });
+                    run();
                 }
                 return d.promise();
             },
@@ -13013,11 +13102,18 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 if (!$.isFunction(auth)) {
                     throw new Error(strings.loginIsNotAFunction);
                 }
-                if (self.token(true) && self.login_name(true)) {
-                    if ($.isFunction(success)) {
-                        success();
+                in_login = true;
+                if (self.token() && self.level() == 1 && !autologin) {
+                    in_login = false; // logout will call login
+                    self.logout(true);
+                } else {
+                    if (self.token(true) && self.login_name(true)) {
+                        in_login = false;
+                        if ($.isFunction(success)) {
+                            success();
+                        }
+                        return self;
                     }
-                    return self;
                 }
                 var user = null;
                 // don't store login data in history
@@ -13026,7 +13122,6 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 }
                 // so we know how many times call pop
                 var level = self.level();
-                in_login = true;
                 function login_callback(user, token, silent, event) {
                     if (token) {
                         while (self.level() > level) {
@@ -13036,8 +13131,8 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                             command_line.history().enable();
                         }
                         var name = self.prefix_name(true) + '_';
-                        $.Storage.set(name + 'token', token);
-                        $.Storage.set(name + 'login', user);
+                        storage.set(name + 'token', token);
+                        storage.set(name + 'login', user);
                         in_login = false;
                         if ($.isFunction(success)) {
                             // will be used internaly since users know
@@ -13108,7 +13203,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     console.warn('This function is deprecated, use set_inte'+
                                  'rpreter insead!');
                 }
-                self.set_interpreter.apply(self, arguments);
+                return self.set_interpreter.apply(self, arguments);
             },
             // -------------------------------------------------------------
             set_interpreter: function(user_intrp, login) {
@@ -13128,6 +13223,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 } else {
                     overwrite_interpreter();
                 }
+                return self;
             },
             // -------------------------------------------------------------
             // :: Show user greetings or terminal signature
@@ -13145,14 +13241,19 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // -------------------------------------------------------------
             // :: Pause the terminal, it should be used for ajax calls
             // -------------------------------------------------------------
-            pause: function() {
+            pause: function(visible) {
                 onPause();
                 if (!paused && command_line) {
-                    paused = true;
-                    command_line.disable().hidden();
-                    if ($.isFunction(settings.onPause)) {
-                        settings.onPause();
-                    }
+                    init_deferr.then(function() {
+                        paused = true;
+                        command_line.disable();
+                        if (!visible) {
+                            command_line.hidden();
+                        }
+                        if ($.isFunction(settings.onPause)) {
+                            settings.onPause();
+                        }
+                    });
                 }
                 return self;
             },
@@ -13160,26 +13261,33 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: Resume the previously paused terminal
             // -------------------------------------------------------------
             resume: function() {
-                if (paused && command_line) {
+                function run() {
                     paused = false;
-                    command_line.enable().visible();
+                    if (terminals.front() == self) {
+                        command_line.enable();
+                    }
+                    command_line.visible();
                     var original = delayed_commands;
                     delayed_commands = [];
-                    (function recur() {
-                        if (original.length) {
-                            self.exec.apply(self, original.shift()).then(recur);
-                        } else {
-                            self.trigger('resume');
-                            var fn = resume_callbacks.shift();
-                            if (fn) {
-                                fn();
-                            }
-                            scroll_to_bottom();
-                            if ($.isFunction(settings.onResume)) {
-                                settings.onResume();
-                            }
-                        }
-                    })();
+                    for (var i = 0; i < original.length; ++i) {
+                        self.exec.apply(self, original[i]);
+                    }
+                    self.trigger('resume');
+                    var fn = resume_callbacks.shift();
+                    if (fn) {
+                        fn();
+                    }
+                    scroll_to_bottom();
+                    if ($.isFunction(settings.onResume)) {
+                        settings.onResume();
+                    }
+                }
+                if (paused && command_line) {
+                    if (init_deferr.state() != 'resolved') {
+                        init_deferr.then(run);
+                    } else {
+                        run();
+                    }
                 }
                 return self;
             },
@@ -13224,6 +13332,14 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 return self;
             },
             // -------------------------------------------------------------
+            // :: clear the history state
+            // -------------------------------------------------------------
+            clear_history_state: function() {
+                hash_commands = [];
+                save_state = [];
+                return self;
+            },
+            // -------------------------------------------------------------
             // :: Switch to the next terminal
             // -------------------------------------------------------------
             next: function() {
@@ -13233,77 +13349,75 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     var offsetTop = self.offset().top;
                     var height = self.height();
                     var scrollTop = self.scrollTop();
-                    if (!is_scrolled_into_view(self)) {
+                    /*if (!is_scrolled_into_view(self)) {
                         self.enable();
                         $('html,body').animate({
                             scrollTop: offsetTop-50
                         }, 500);
                         return self;
                     } else {
-                        terminals.front().disable();
-                        var next = terminals.rotate().enable();
-                        // 100 provides buffer in viewport
-                        var x = next.offset().top - 50;
-                        $('html,body').animate({scrollTop: x}, 500);
-                        try {
-                            settings.onTerminalChange(next);
-                        } catch (e) {
-                            display_exception(e, 'onTerminalChange');
-                            throw e;
-                        }
-                        return next;
+                    */
+                    terminals.front().disable();
+                    var next = terminals.rotate().enable();
+                    // 100 provides buffer in viewport
+                    var x = next.offset().top - 50;
+                    $('html,body').animate({scrollTop: x}, 500);
+                    try {
+                        settings.onTerminalChange(next);
+                    } catch (e) {
+                        display_exception(e, 'onTerminalChange');
                     }
+                    return next;
                 }
             },
             // -------------------------------------------------------------
             // :: Make the terminal in focus or blur depending on the first
             // :: argument. If there is more then one terminal it will
             // :: switch to next one, if the second argument is set to true
-            // ::  the events will be not fired. Used on init
+            // :: the events will be not fired. Used on init
             // -------------------------------------------------------------
             focus: function(toggle, silent) {
-                if (terminals.length() === 1) {
-                    if (toggle === false) {
-                        try {
-                            if (!silent && settings.onBlur(self) !== false ||
-                                silent) {
-                                self.disable();
+                init_deferr.then(function() {
+                    if (terminals.length() === 1) {
+                        if (toggle === false) {
+                            try {
+                                if (!silent && settings.onBlur(self) !== false ||
+                                    silent) {
+                                    self.disable();
+                                }
+                            } catch (e) {
+                                display_exception(e, 'onBlur');
                             }
-                        } catch (e) {
-                            display_exception(e, 'onBlur');
-                            throw e;
+                        } else {
+                            try {
+                                if (!silent && settings.onFocus(self) !== false ||
+                                    silent) {
+                                    self.enable();
+                                }
+                            } catch (e) {
+                                display_exception(e, 'onFocus');
+                            }
                         }
                     } else {
-                        try {
-                            if (!silent && settings.onFocus(self) !== false ||
-                                silent) {
-                                self.enable();
-                            }
-                        } catch (e) {
-                            display_exception(e, 'onFocus');
-                            throw e;
-                        }
-                    }
-                } else {
-                    if (toggle === false) {
-                        self.next();
-                    } else {
-                        var front = terminals.front();
-                        if (front != self) {
-                            front.disable();
-                            if (!silent) {
-                                try {
-                                    settings.onTerminalChange(self);
-                                } catch (e) {
-                                    display_exception(e, 'onTerminalChange');
-                                    throw e;
+                        if (toggle === false) {
+                            self.next();
+                        } else {
+                            var front = terminals.front();
+                            if (front != self) {
+                                front.disable();
+                                if (!silent) {
+                                    try {
+                                        settings.onTerminalChange(self);
+                                    } catch (e) {
+                                        display_exception(e, 'onTerminalChange');
+                                    }
                                 }
                             }
+                            terminals.set(self);
+                            self.enable();
                         }
-                        terminals.set(self);
-                        self.enable();
                     }
-                }
+                });
                 // why this delay - it can't be use for mobile
                 /*
                 self.oneTime(1, function() {
@@ -13315,13 +13429,15 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: Disable/Enable terminal that can be enabled by click
             // -------------------------------------------------------------
             freeze: function(freeze) {
-                if (freeze) {
-                    self.disable();
-                    frozen = true;
-                } else {
-                    frozen = false;
-                    self.enable();
-                }
+                init_deferr.then(function() {
+                    if (freeze) {
+                        self.disable();
+                        frozen = true;
+                    } else {
+                        frozen = false;
+                        self.enable();
+                    }
+                });
             },
             // -------------------------------------------------------------
             // :: check if terminal is frozen
@@ -13338,10 +13454,10 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                         //enabling first time
                         self.resize();
                     }
-                    if (command_line) {
+                    init_deferr.then(function() {
                         command_line.enable();
                         enabled = true;
-                    }
+                    });
                 }
                 return self;
             },
@@ -13349,9 +13465,11 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: Disable the terminal
             // -------------------------------------------------------------
             disable: function() {
-                if (enabled && command_line && !frozen) {
-                    enabled = false;
-                    command_line.disable();
+                if (enabled && !frozen) {
+                    init_deferr.then(function() {
+                        enabled = false;
+                        command_line.disable();
+                    });
                 }
                 return self;
             },
@@ -13396,7 +13514,9 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: Change the command line to the new one
             // -------------------------------------------------------------
             set_command: function(command) {
-                command_line.set(command);
+                init_deferr.then(function() {
+                    command_line.set(command);
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -13404,7 +13524,9 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // -------------------------------------------------------------
             insert: function(string) {
                 if (typeof string === 'string') {
-                    command_line.insert(string);
+                    init_deferr.then(function() {
+                        command_line.insert(string);
+                    });
                     return self;
                 } else {
                     throw "insert function argument is not a string";
@@ -13414,16 +13536,18 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: Set the prompt of the command line
             // -------------------------------------------------------------
             set_prompt: function(prompt) {
-                if (validate('prompt', prompt)) {
-                    if ($.isFunction(prompt)) {
-                        command_line.prompt(function(callback) {
-                            prompt(callback, self);
-                        });
-                    } else {
-                        command_line.prompt(prompt);
+                init_deferr.then(function() {
+                    if (validate('prompt', prompt)) {
+                        if ($.isFunction(prompt)) {
+                            command_line.prompt(function(callback) {
+                                prompt(callback, self);
+                            });
+                        } else {
+                            command_line.prompt(prompt);
+                        }
+                        interpreters.top().prompt = prompt;
                     }
-                    interpreters.top().prompt = prompt;
-                }
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -13440,7 +13564,9 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: strings longer then one)
             // -------------------------------------------------------------
             set_mask: function(mask) {
-                command_line.mask(mask === true ? settings.maskChar : mask);
+                init_deferr.then(function() {
+                    command_line.mask(mask === true ? settings.maskChar : mask);
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -13528,7 +13654,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                             settings.outputLimit;
                         var $lines = output.find('div div');
                         if ($lines.length > limit) {
-                            var max = lines.length-limit+1;
+                            var max = $lines.length-limit+1;
                             var for_remove = $lines.slice(0, max);
                             // you can't get parent if you remove the
                             // element so we first get the parent
@@ -13544,7 +13670,11 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                             });
                         }
                     }
-                    scroll_to_bottom();
+                    num_rows = get_num_rows(self);
+                    on_scrollbar_show_resize();
+                    if (settings.scrollOnEcho) {
+                        scroll_to_bottom();
+                    }
                     output_buffer = [];
                 } catch (e) {
                     alert('[Flush] ' + exception_message(e) + '\n' +
@@ -13556,18 +13686,31 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: Update the output line - line number can be negative
             // -------------------------------------------------------------
             update: function(line, string) {
-                if (line < 0) {
-                    line = lines.length + line; // yes +
-                }
-                if (!lines[line]) {
-                    self.error('Invalid line number ' + line);
-                } else {
-                    lines[line][0] = string;
-                    // it would be hard to figure out which div need to be
-                    // updated so we update everything
-                    redraw();
-                }
+                init_deferr.then(function() {
+                    if (line < 0) {
+                        line = lines.length + line; // yes +
+                    }
+                    if (!lines[line]) {
+                        self.error('Invalid line number ' + line);
+                    } else {
+                        if (string === null) {
+                            lines.splice(line, 1);
+                        } else {
+                            lines[line][0] = string;
+                        }
+                        // it would be hard to figure out which div need to be
+                        // updated so we update everything
+                        redraw();
+                    }
+                });
                 return self;
+            },
+            // -------------------------------------------------------------
+            // :: return index of last line in case when you need to update
+            // :: after something is echo on the terminal
+            // -------------------------------------------------------------
+            last_index: function() {
+                return lines.length-1;
             },
             // -------------------------------------------------------------
             // :: Print data to the terminal output. It can have two options
@@ -13582,24 +13725,24 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 string = string || '';
                 $.when(string).then(function(string) {
                     try {
-                        output_buffer = [];
                         var locals = $.extend({
                             flush: true,
                             raw: settings.raw,
                             finalize: $.noop,
                             keepWords: false
                         }, options || {});
+                        if (locals.flush) {
+                            output_buffer = [];
+                        }
                         process_line(string, locals);
-                        // extended commands should be processed only once
-                        // in echo and not on redraw
+                        // extended commands should be processed only
+                        // once in echo and not on redraw
                         lines.push([string, $.extend(locals, {
                             exec: false
                         })]);
                         if (locals.flush) {
                             self.flush();
                         }
-                        num_rows = get_num_rows(self);
-                        on_scrollbar_show_resize();
                     } catch (e) {
                         // if echo throw exception we can't use error to
                         // display that exception
@@ -13647,7 +13790,8 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     });
                 }
                 if (e.stack) {
-                    self.echo(e.stack.split(/\n/g).map(function(trace) {
+                    var stack = $.terminal.escape_brackets(e.stack);
+                    self.echo(stack.split(/\n/g).map(function(trace) {
                         return '[[;;;error]' + trace.replace(url_re, function(url) {
                             return ']' + url + '[[;;;error]';
                         }) + ']';
@@ -13685,21 +13829,23 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // -------------------------------------------------------------
             logout: function(local) {
                 if (in_login) {
-                    throw new Error(sprintf(strings.notWhileLogin, 'import_view'));
+                    throw new Error(sprintf(strings.notWhileLogin, 'logout'));
                 }
-                if (local) {
-                    var login = logins.pop();
-                    self.set_token(undefined, true);
-                    self.login.apply(self, login);
-                } else {
-                    while (interpreters.size() > 0) {
-                        // pop will call global_logout that will call login
-                        // and size will be > 0; this is workaround the problem
-                        if (self.pop()) {
-                            break;
+                init_deferr.then(function() {
+                    if (local) {
+                        var login = logins.pop();
+                        self.set_token(undefined, true);
+                        self.login.apply(self, login);
+                    } else {
+                        while (interpreters.size() > 0) {
+                            // pop will call global_logout that will call login
+                            // and size will be > 0; this is workaround the problem
+                            if (self.pop()) {
+                                break;
+                            }
                         }
                     }
-                }
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -13708,7 +13854,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: there is no login
             // -------------------------------------------------------------
             token: function(local) {
-                return $.Storage.get(self.prefix_name(local) + '_token');
+                return storage.get(self.prefix_name(local) + '_token');
             },
             // -------------------------------------------------------------
             // :: Function sets the token to the supplied value. This function
@@ -13717,9 +13863,9 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             set_token: function(token, local) {
                 var name = self.prefix_name(local) + '_token';
                 if (typeof token == 'undefined') {
-                    $.Storage.remove(name, token);
+                    storage.remove(name, token);
                 } else {
-                    $.Storage.set(name, token);
+                    storage.set(name, token);
                 }
                 return self;
             },
@@ -13728,13 +13874,13 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: by the set_token method.
             // -------------------------------------------------------------
             get_token: function(local) {
-                return $.Storage.get(self.prefix_name(local) + '_token');
+                return storage.get(self.prefix_name(local) + '_token');
             },
             // -------------------------------------------------------------
             // :: Function return Login name entered by the user
             // -------------------------------------------------------------
             login_name: function(local) {
-                return $.Storage.get(self.prefix_name(local) + '_login');
+                return storage.get(self.prefix_name(local) + '_login');
             },
             // -------------------------------------------------------------
             // :: Function returns the name of current interpreter
@@ -13778,47 +13924,58 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: Push a new interenter on the Stack
             // -------------------------------------------------------------
             push: function(interpreter, options) {
-                options = options || {};
-                if (!options.name && prev_command) {
-                    // push is called in login
-                    options.name = prev_command.name;
-                }
-                if (options.prompt === undefined) {
-                    options.prompt = options.name + ' ';
-                }
-                //names.push(options.name);
-                var top = interpreters.top();
-                if (top) {
-                    top.mask = command_line.mask();
-                }
-                var was_paused = paused;
-                self.pause();
-                make_interpreter(interpreter, !!options.login, function(ret) {
-                    // result is object with interpreter and completion
-                    // properties
-                    interpreters.push($.extend({}, ret, options));
-                    if (options.login) {
-                        var type = $.type(options.login);
-                        if (type == 'function') {
-                            // self.pop on error
-                            self.login(options.login,
-                                       false,
-                                       prepare_top_interpreter,
-                                       self.pop);
-                        } else if ($.type(interpreter) == 'string' &&
-                                   type == 'string' || type == 'boolean') {
-                            self.login(make_json_rpc_login(interpreter,
-                                                           options.login),
-                                       false,
-                                       prepare_top_interpreter,
-                                       self.pop);
+                init_deferr.then(function() {
+                    options = options || {};
+                    var defaults = {
+                        infiniteLogin: false
+                    };
+                    var settings = $.extend({}, defaults, options);
+                    if (!settings.name && prev_command) {
+                        // push is called in login
+                        settings.name = prev_command.name;
+                    }
+                    if (settings.prompt === undefined) {
+                        settings.prompt = (settings.name || '>') + ' ';
+                    }
+                    //names.push(options.name);
+                    var top = interpreters.top();
+                    if (top) {
+                        top.mask = command_line.mask();
+                    }
+                    var was_paused = paused;
+                    //self.pause();
+                    make_interpreter(interpreter, !!options.login, function(ret) {
+                        // result is object with interpreter and completion
+                        // properties
+                        interpreters.push($.extend({}, ret, settings));
+                        if ($.isArray(ret.completion) && settings.completion === true) {
+                            interpreters.top().completion = ret.completion;
+                        } else if (!ret.completion && settings.completion === true) {
+                            interpreters.top().completion = false;
                         }
-                    } else {
-                        prepare_top_interpreter();
-                    }
-                    if (!was_paused) {
-                        self.resume();
-                    }
+                        if (settings.login) {
+                            var type = $.type(settings.login);
+                            if (type == 'function') {
+                                // self.pop on error
+                                self.login(settings.login,
+                                           settings.infiniteLogin,
+                                           prepare_top_interpreter,
+                                           settings.infiniteLogin ? $.noop : self.pop);
+                            } else if ($.type(interpreter) == 'string' &&
+                                       type == 'string' || type == 'boolean') {
+                                self.login(make_json_rpc_login(interpreter,
+                                                               settings.login),
+                                           settings.infiniteLogin,
+                                           prepare_top_interpreter,
+                                           settings.infiniteLogin ? $.noop : self.pop);
+                            }
+                        } else {
+                            prepare_top_interpreter();
+                        }
+                        if (!was_paused) {
+                            self.resume();
+                        }
+                    });
                 });
                 return self;
             },
@@ -13838,7 +13995,6 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                                 settings.onExit(self);
                             } catch (e) {
                                 display_exception(e, 'onExit');
-                                throw e;
                             }
                         }
                         return true;
@@ -13851,12 +14007,15 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     }
                     var current = interpreters.pop();
                     prepare_top_interpreter();
+                    // we check in case if you don't pop from password interpreter
+                    if (in_login && self.get_prompt() != strings.login + ': ') {
+                        in_login = false;
+                    }
                     if ($.isFunction(current.onExit)) {
                         try {
                             current.onExit(self);
                         } catch (e) {
                             display_exception(e, 'onExit');
-                            throw e;
                         }
                     }
                     // restore mask
@@ -13891,11 +14050,13 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: Reinitialize the terminal
             // -------------------------------------------------------------
             reset: function() {
-                self.clear();
-                while(interpreters.size() > 1) {
-                    interpreters.pop();
-                }
-                initialize();
+                init_deferr.then(function() {
+                    self.clear();
+                    while(interpreters.size() > 1) {
+                        interpreters.pop();
+                    }
+                    initialize();
+                });
                 return self;
             },
             // -------------------------------------------------------------
@@ -13903,15 +14064,17 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: logout you until you refresh the browser
             // -------------------------------------------------------------
             purge: function() {
-                var prefix = self.prefix_name() + '_';
-                var names = $.Storage.get(prefix + 'interpreters');
-                $.each($.parseJSON(names), function(_, name) {
-                    $.Storage.remove(name + '_commands');
-                    $.Storage.remove(name + '_token');
-                    $.Storage.remove(name + '_login');
+                init_deferr.then(function() {
+                    var prefix = self.prefix_name() + '_';
+                    var names = storage.get(prefix + 'interpreters');
+                    $.each($.parseJSON(names), function(_, name) {
+                        storage.remove(name + '_commands');
+                        storage.remove(name + '_token');
+                        storage.remove(name + '_login');
+                    });
+                    command_line.purge();
+                    storage.remove(prefix + 'interpreters');
                 });
-                command_line.purge();
-                $.Storage.remove(prefix + 'interpreters');
                 return self;
             },
             // -------------------------------------------------------------
@@ -13920,21 +14083,23 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // :: when you refresh the browser
             // -------------------------------------------------------------
             destroy: function() {
-                command_line.destroy().remove();
-                output.remove();
-                $(document).unbind('.terminal');
-                $(window).unbind('.terminal');
-                self.unbind('click mousewheel');
-                self.removeData('terminal').removeClass('terminal');
-                if (settings.width) {
-                    self.css('width', '');
-                }
-                if (settings.height) {
-                    self.css('height', '');
-                }
-                $(window).off('blur', blur_terminal).
-                    off('focus', focus_terminal);
-                terminals.remove(terminal_id);
+                init_deferr.then(function() {
+                    command_line.destroy().remove();
+                    output.remove();
+                    $(document).unbind('.terminal');
+                    $(window).unbind('.terminal');
+                    self.unbind('click mousewheel mousedown mouseup');
+                    self.removeData('terminal').removeClass('terminal');
+                    if (settings.width) {
+                        self.css('width', '');
+                    }
+                    if (settings.height) {
+                        self.css('height', '');
+                    }
+                    $(window).off('blur', blur_terminal).
+                        off('focus', focus_terminal);
+                    terminals.remove(terminal_id);
+                });
                 return self;
             }
         }, function(name, fun) {
@@ -14011,7 +14176,9 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         // before login event
         if (settings.login && $.isFunction(settings.onBeforeLogin)) {
             try {
-                settings.onBeforeLogin(self);
+                if (settings.onBeforeLogin(self) === false) {
+                    autologin = false;
+                }
             } catch (e) {
                 display_exception(e, 'onBeforeLogin');
                 throw e;
@@ -14022,12 +14189,17 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
         var base_interpreter;
         if (typeof init_interpreter == 'string') {
             base_interpreter = init_interpreter;
-        } else if (init_interpreter instanceof Array &&
-                   typeof init_interpreter[0] == 'string') {
-            base_interpreter = init_interpreter[0];
+        } else if (init_interpreter instanceof Array) {
+            // first JSON-RPC
+            for (var i=0, len=init_interpreter.length; i<len; ++i) {
+                if (typeof init_interpreter[i] == 'string') {
+                    base_interpreter = init_interpreter[i];
+                    break;
+                }
+            }
         }
         if (base_interpreter &&
-            (typeof settings.login === 'string' || settings.login)) {
+            (typeof settings.login === 'string' || settings.login === true)) {
             settings.login = make_json_rpc_login(base_interpreter,
                                                  settings.login);
         }
@@ -14045,9 +14217,12 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             self.disable();
         }
         make_interpreter(init_interpreter, !!settings.login, function(itrp) {
-            if (settings.completion && typeof settings.completion != 'boolean') {
-                //overwrite interpreter completion by global setting #224
-                itrp.completion = settings.completion;
+            if (settings.completion && typeof settings.completion != 'boolean' ||
+                !settings.completion) {
+                // overwrite interpreter completion by global setting #224
+                // we use string to indicate that it need to be taken from settings
+                // so we are able to change it using option API method
+                itrp.completion = 'settings';
             }
             interpreters = new Stack($.extend({
                 name: settings.name,
@@ -14061,7 +14236,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(self).cmd({
                 prompt: settings.prompt,
-                history: settings.history,
+                history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
                 historySize: settings.historySize,
                 width: '100%',
@@ -14106,9 +14281,10 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                 $(document).bind('click.terminal', disable).
                     bind('contextmenu.terminal', disable);
             });
+            var $win = $(window);
             if (!is_touch) {
                 // work weird on mobile
-                var $win = $(window).on('focus', focus_terminal).
+                $win.on('focus', focus_terminal).
                     on('blur', blur_terminal);
             } else {
                 /*
@@ -14118,16 +14294,43 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     }
                 });*/
             }
-            self.click(function(e) {
-                if (!self.enabled()) {
-                    self.focus();
-                } else if (is_touch) {
-                    // keep focusing silently so textarea get focus
-                    self.focus(true, true);
-                }
-                // this will ensure that textarea has focus
-                command_line.enable();
-            }).delegate('.exception a', 'click', function(e) {
+            if (is_touch) {
+                self.click(function() {
+                    if (!self.enabled() && !frozen) {
+                        self.focus();
+                        command_line.enable();
+                    } else {
+                        self.focus(false);
+                    }
+                });
+            } else {
+                // detect mouse drag
+                (function() {
+                    var count = 0;
+                    var isDragging = false;
+                    self.mousedown(function() {
+                        self.oneTime(1, function() {
+                            $(window).mousemove(function() {
+                                isDragging = true;
+                                count = 0;
+                                $(window).unbind('mousemove');
+                            });
+                        });
+                    }).mouseup(function() {
+                        var wasDragging = isDragging;
+                        isDragging = false;
+                        $(window).unbind('mousemove');
+                        if (!wasDragging && ++count == 1) {
+                            count = 0;
+                            if (!self.enabled() && !frozen) {
+                                self.focus();
+                                command_line.enable();
+                            }
+                        }
+                    });
+                })();
+            }
+            self.delegate('.exception a', 'click', function(e) {
                 //.on('click', '.exception a', function(e) {
                 // in new jquery .delegate just call .on
                 var href = $(this).attr('href');
@@ -14202,22 +14405,25 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
             // exec from hash called in each terminal instance
             if (settings.execHash) {
                 if (location.hash) {
-                    try {
-                        var hash = location.hash.replace(/^#/, '');
-                        // yes no var - global inside terminal
-                        hash_commands = $.parseJSON(decodeURIComponent(hash));
-                        var i = 0;
-                        (function recur() {
-                            var spec = hash_commands[i++];
-                            if (spec) {
-                                exec_spec(spec).then(recur);
-                            } else {
-                                change_hash = true;
-                            }
-                        })();//*/
-                    } catch (e) {
-                        //invalid json - ignore
-                    }
+                    // wait until login is initialized
+                    setTimeout(function() {
+                        try {
+                            var hash = location.hash.replace(/^#/, '');
+                            // yes no var - local inside terminal
+                            hash_commands = $.parseJSON(decodeURIComponent(hash));
+                            var i = 0;
+                            (function recur() {
+                                var spec = hash_commands[i++];
+                                if (spec) {
+                                    exec_spec(spec).then(recur);
+                                } else {
+                                    change_hash = true;
+                                }
+                            })();//*/
+                        } catch (e) {
+                            //invalid json - ignore
+                        }
+                    });
                 } else {
                     change_hash = true;
                 }
@@ -14258,6 +14464,7 @@ CodeMirror.defineMIME("text/x-portugol", "portugol");
                     }
                 });
             }
+            init_deferr.resolve();
         }); // make_interpreter
         self.data('terminal', self);
         return self;
@@ -25495,7 +25702,8 @@ Interpreter.prototype = {
     },
     visit: function (node, context) {
         var method = 'visit' + node.name + 'Node';
-
+        console.log(method);
+        //alert(JSON.stringify(node));
         if (this[method] === undefined) {
             global.terminal.error('Invalid Node: ' + node.name);
             throw new Error('Invalid Node: ' + node.name);
@@ -25581,7 +25789,7 @@ Interpreter.prototype = {
 
         for (var i=0; i<node.args.length; i++) {
             args[i] = this.visit(node.args[i], context);
-            args[i].type = "literal"; //CORRIGE O PROBLEMA DA TIPAGEM AO IMPRIMIR
+            //args[i].type = "literal"; //CORRIGE O PROBLEMA DA TIPAGEM AO IMPRIMIR
 
             item = fn.value.params[i];
 
@@ -25603,8 +25811,10 @@ Interpreter.prototype = {
         }
 
         if (fnNode.name == 'NativeFunction') {
-            var esperado = this.visit(global.left, context);
-            fnNode.type = esperado.type; //altera o tipo do nó para o tipo esperado 
+            if (global.left) { //PROBLEMA PRINTAR SEM VARIAVEIS SETADAS
+                var esperado = this.visit(global.left, context);
+                fnNode.type = esperado.type; //altera o tipo do nó para o tipo esperado
+            }
 
             if (fnNode.id == 'leia') {
                 ret = this.visit(fnNode.execute(args)); //ONDE É EXECUTADO O LEIA  alert(JSON.stringify(ret));
@@ -25615,7 +25825,7 @@ Interpreter.prototype = {
         } else {
             ret = this.visit(fnNode.body, fnContext);
         }
-        
+
         if (ret.type != fnNode.type) {
             global.terminal.error('Erro de Tipagem: Função retorna tipo errado. Declarado: ' + fnNode.type + '. Encontrado: ' + ret.type);
             throw new Error('Erro de Tipagem: Função retorna tipo errado. Declarado: ' + fnNode.type + '. Encontrado: ' + ret.type);
@@ -25646,7 +25856,7 @@ Interpreter.prototype = {
                 return ret;
             }
         }
-    }, 
+    },
     visitForStatementNode: function (node, context) {
         var index = this.visit(node.variable, context),
             start = this.visit(node.start, context),
@@ -25710,7 +25920,7 @@ Interpreter.prototype = {
             return left < right;
         } else if (node.operator == '<=') {
             return left <= right;
-        }   
+        }
         global.terminal.error('Operador Inválido: ' + node.operator);
         throw new Error('Operador Inválido: ' + node.operator);
     },
@@ -25761,7 +25971,7 @@ Interpreter.prototype = {
             //node.value = str.substr(1, str.length-2); //remove trailling quotes (original do jspt, usando substr)
             node.value = str.replace(/["]+/g, ''); //remove as aspas usando expressão regular
         }
-
+        //alert(JSON.stringify(node));
         return node;
     },
     visitIdentifierNode: function (node, context) {
@@ -25865,7 +26075,7 @@ exports.createContext = createContext;
 
 },{"./ast":6,"./buffer":7,"./compiler/javascript":8,"./context":9,"./grammar":10,"./interpreter":11}],13:[function(require,module,exports){
 (function (global){
-/**
+	/**
  * Javascript Portugol
  * https://github.com/moacir/jspt
  *
@@ -25892,19 +26102,24 @@ Imprima.setBody(function (text) {
 });
 std.setFunction('imprima', Imprima);
 
-//Imprima.getInfo();
+Imprima.getInfo();
 
 // //LEIA
 var Leia = new NativeFunction('leia', 'inteiro');
-Leia.addParameter('text', 'literal');
+//Leia.addParameter('text', 'literal');
 
 Leia.setBody(function (text) {
+	//global.terminal.insert("10");
+	//global.terminal.push();
 	var ret = prompt(text);
+	//global.terminal.insert("10");
+	//var ret = global.terminal.read("", function (input) {console.log("ok")});
+	//var ret = global.terminal.push();
 	return ret;
 });
 std.setFunction('leia', Leia);
 
-//Leia.getInfo();
+Leia.getInfo();
 
 exports.module = std;
 
@@ -25923,6 +26138,7 @@ exports.module = std;
 var AST = require('./ast').ast;
 
 function NativeFunction(id, type, params, body) {
+    console.log("instanciou um native " + id);
     this.name = 'NativeFunction';
     this.id = id;
     this.type = type || 'vazio';
@@ -25931,7 +26147,7 @@ function NativeFunction(id, type, params, body) {
 }
 
 NativeFunction.prototype.getInfo = function () {
-    alert(JSON.stringify(this));
+    //alert(JSON.stringify(this));
 };
 
 NativeFunction.prototype.addParameter = function (id, type) {
@@ -25964,6 +26180,7 @@ var css = "/* BASICS */\n.CodeMirror {\n  /* Set height, width, borders, and glo
 //CSS
 var css = require('./app.css');
 
+
 //REQUIRE NO JQUERY
 global.jQuery = require('jquery');
 
@@ -25974,18 +26191,20 @@ global.valor = null;
 require('jquery.terminal');
 jQuery(function($) {
     global.terminal = $('#term_demo').terminal(function(command, term) {
+        if (command == "js") {
+            alert("ok");
+        }
       //FUNÇÕES DO TERMINAL
       global.controle = 1;
       global.valor = command;
-      //alert(global.valor);
+      alert(global.valor);
     }, {
         greetings: '',
         name: 'portugol',
         height: 200,
         prompt: '' 
     });
-    //global.terminal.disable();
-    global.terminal.pause(true);
+    global.terminal.freeze(false);
 });
 
 //REQUIRE MODE PORTUGOL PARA CODEMIRROR
@@ -25995,7 +26214,6 @@ require('codemirror/mode/portugol/portugol');
 var jspt = require('jspt');
 
 //REQUIRE CODEMIRROR
-
 var CodeMirror = require('codemirror/lib/codemirror');
 
 var editor = CodeMirror.fromTextArea(document.getElementById("codigo"), {

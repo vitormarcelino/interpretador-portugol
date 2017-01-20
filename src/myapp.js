@@ -1,6 +1,7 @@
 //CSS
 var css = require('./app.css');
 
+
 //REQUIRE NO JQUERY
 global.jQuery = require('jquery');
 
@@ -11,18 +12,20 @@ global.valor = null;
 require('jquery.terminal');
 jQuery(function($) {
     global.terminal = $('#term_demo').terminal(function(command, term) {
+        if (command == "js") {
+            alert("ok");
+        }
       //FUNÇÕES DO TERMINAL
       global.controle = 1;
       global.valor = command;
-      //alert(global.valor);
+      alert(global.valor);
     }, {
         greetings: '',
         name: 'portugol',
         height: 200,
         prompt: '' 
     });
-    //global.terminal.disable();
-    global.terminal.pause(true);
+    global.terminal.freeze(false);
 });
 
 //REQUIRE MODE PORTUGOL PARA CODEMIRROR
@@ -32,7 +35,6 @@ require('codemirror/mode/portugol/portugol');
 var jspt = require('jspt');
 
 //REQUIRE CODEMIRROR
-
 var CodeMirror = require('codemirror/lib/codemirror');
 
 var editor = CodeMirror.fromTextArea(document.getElementById("codigo"), {
