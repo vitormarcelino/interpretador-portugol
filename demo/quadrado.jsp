@@ -21,3 +21,8 @@ inicio
 	x:=leia();
     imprima("numero: "+ x + " quadrado: " + x*x);
 fim
+
+algoritmo hello;
+inicio
+    imprima("hello");
+fim

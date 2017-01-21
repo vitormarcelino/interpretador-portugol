@@ -24289,7 +24289,6 @@ return jQuery;
 }));
 
 },{}],6:[function(require,module,exports){
-(function (global){
 /**
  * Javascript Portugol
  * https://github.com/moacir/jspt
@@ -24326,7 +24325,7 @@ var AST = {
         this.operator = operator;
         this.left = left;
         this.right = right;
-        global.left = left;
+        //global.left = left;
     },
     UnaryExpressionNode: function (operator, argument) {
         this.name = 'UnaryExpression';
@@ -24337,13 +24336,13 @@ var AST = {
         this.name = 'BinaryExpression';
         this.operator = operator;
         this.left = left;
-        this.right = right; 
+        this.right = right;
     },
     LogicalExpressionNode: function (operator, left, right) {
         this.name = 'LogicalExpression';
         this.operator = operator;
         this.left = left;
-        this.right = right; 
+        this.right = right;
     },
     ArithmeticExpressionNode: function (operator, left, right) {
         this.name = 'ArithmeticExpression';
@@ -24359,7 +24358,7 @@ var AST = {
     FunctionStatementNode: function (call) {
         this.name = 'FunctionStatement';
         this.call = call;
-    }, 
+    },
     FunctionDeclarationNode: function (id, type, params, variables, body) {
         this.name = 'FunctionDeclaration';
         this.id = id;
@@ -24367,12 +24366,12 @@ var AST = {
         this.params = params || [];
         this.variables = variables || [];
         this.body = body;
-    }, 
+    },
     FunctionParameterNode: function (id, type) {
         this.name = 'FunctionParameter';
         this.id = id;
         this.type = type;
-    }, 
+    },
     FunctionDeclarationListNode: function (list) {
         this.name = 'FunctionDeclarationList';
         this.list = list || [];
@@ -24380,7 +24379,7 @@ var AST = {
     ReturnStatementNode: function (argument) {
         this.name = 'ReturnStatement';
         this.argument = argument;
-    }, 
+    },
     StatementListNode: function (list) {
         this.name = 'StatementList';
         this.list = list || [];
@@ -24395,7 +24394,7 @@ var AST = {
         this.name = 'WhileStatement';
         this.test = test;
         this.body = body;
-    }, 
+    },
     ForStatementNode: function (variable, start, end, update, body) {
         this.name = 'ForStatement';
         this.variable = variable;
@@ -24443,7 +24442,6 @@ AST.Util = {
 
 exports.ast = AST;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],7:[function(require,module,exports){
 /**
  * Javascript Portugol
@@ -25789,7 +25787,7 @@ Interpreter.prototype = {
 
         for (var i=0; i<node.args.length; i++) {
             args[i] = this.visit(node.args[i], context);
-            //args[i].type = "literal"; //CORRIGE O PROBLEMA DA TIPAGEM AO IMPRIMIR
+            args[i].type = "literal"; //CORRIGE O PROBLEMA DA TIPAGEM AO IMPRIMIR
 
             item = fn.value.params[i];
 
@@ -25811,10 +25809,12 @@ Interpreter.prototype = {
         }
 
         if (fnNode.name == 'NativeFunction') {
+            /*
             if (global.left) { //PROBLEMA PRINTAR SEM VARIAVEIS SETADAS
                 var esperado = this.visit(global.left, context);
                 fnNode.type = esperado.type; //altera o tipo do nó para o tipo esperado
             }
+            */
 
             if (fnNode.id == 'leia') {
                 ret = this.visit(fnNode.execute(args)); //ONDE É EXECUTADO O LEIA  alert(JSON.stringify(ret));
