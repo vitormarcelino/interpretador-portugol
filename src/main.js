@@ -25738,7 +25738,7 @@ Interpreter.prototype = {
         // alert ("IDENT :" + JSON.stringify(ident));
         // alert ("RIGHT :" + JSON.stringify(right));
 
-
+        if (right.type=='qualquer'){right.type=ident.type;}
         if (ident.type != right.type) {
             global.terminal.error('Erro de Tipagem: Variável do tipo: ' + ident.type + '. Encontrado: ' + right.type);
             throw new Error('Erro de Tipagem: Variável do tipo: ' + ident.type + '. Encontrado: ' + right.type);
@@ -25787,15 +25787,20 @@ Interpreter.prototype = {
 
         for (var i=0; i<node.args.length; i++) {
             args[i] = this.visit(node.args[i], context);
-            args[i].type = "literal"; //CORRIGE O PROBLEMA DA TIPAGEM AO IMPRIMIR
+            //args[i].type = "literal"; //CORRIGE O PROBLEMA DA TIPAGEM AO IMPRIMIR
 
             item = fn.value.params[i];
+
+            if (item.type == 'qualquer') {
+                item.type = args[i].type;
+            }
+
+            alert(JSON.stringify(args[i]));
 
             if (item.type != args[i].type) {
                 global.terminal.error('Erro de Tipagem: Variável do tipo: ' + item.type + '. Encontrado: ' + args[i].type);
                 throw new Error('Erro de Tipagem: Variável do tipo: ' + item.type + '. Encontrado: ' + args[i].type);
             }
-
             fnContext.setVariable(item.id, item.type, args[i].value);
         }
 
@@ -26009,8 +26014,20 @@ Interpreter.prototype = {
     },
     getValue: function (node) {
         if (typeof node.value !== 'undefined') {
+            if (node.type == 'lógico') {
+                    node.value =  this.visitBooleanLiteral(node.value);
+                } else if (node.type == 'inteiro') {
+                    node.value = parseInt(node.value, 10);
+                } else if (node.type == 'real') {
+                    node.value = parseFloat(node.value);
+                } else if (node.type == 'literal') {
+                    var str = node.value || '""';
+                    //node.value = str.substr(1, str.length-2); //remove trailling quotes (original do jspt, usando substr)
+                    node.value = str.replace(/["]+/g, ''); //remove as aspas usando expressão regular
+                }
             return node.value;
         }
+
         return node;
     }
 };
@@ -26105,17 +26122,19 @@ std.setFunction('imprima', Imprima);
 Imprima.getInfo();
 
 // //LEIA
-var Leia = new NativeFunction('leia', 'inteiro');
-//Leia.addParameter('text', 'literal');
+var Leia = new NativeFunction('leia', 'qualquer');
+//Leia.addParameter('variavel', 'qualquer');
 
-Leia.setBody(function (text) {
+Leia.setBody(function (x, variavel) {
 	//global.terminal.insert("10");
 	//global.terminal.push();
-	var ret = prompt(text);
+
+    variavel = prompt(this.id);
+	//var ret = prompt(variavel);
 	//global.terminal.insert("10");
 	//var ret = global.terminal.read("", function (input) {console.log("ok")});
 	//var ret = global.terminal.push();
-	return ret;
+	return variavel;
 });
 std.setFunction('leia', Leia);
 
@@ -26166,7 +26185,8 @@ NativeFunction.prototype.execute = function (args) {
         values[i] = args[i].value;
     }
 
-    var ret = this.body.apply(null, values);
+    var ret = this.body.apply(this, values);
+    //if (this.type=='qualquer'){this.type=this.params[0].type;}
 
     return new AST.LiteralNode(this.type, ret, ret);
 };
