@@ -24864,151 +24864,151 @@ performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* actio
 var $0 = $$.length - 1;
 switch (yystate) {
 case 1:
- return new yy.AlgorithmNode($$[$0-2], null, null, $$[$0-1]); 
+ return new yy.AlgorithmNode($$[$0-2], null, null, $$[$0-1]);
 break;
 case 2:
- return new yy.AlgorithmNode($$[$0-4], $$[$0-3], $$[$0-1], $$[$0-2]); 
+ return new yy.AlgorithmNode($$[$0-4], $$[$0-3], $$[$0-1], $$[$0-2]);
 break;
 case 3:
- return new yy.AlgorithmNode($$[$0-3], null, $$[$0-1], $$[$0-2]); 
+ return new yy.AlgorithmNode($$[$0-3], null, $$[$0-1], $$[$0-2]);
 break;
 case 4:
- return new yy.AlgorithmNode($$[$0-3], $$[$0-2], null, $$[$0-1]); 
+ return new yy.AlgorithmNode($$[$0-3], $$[$0-2], null, $$[$0-1]);
 break;
 case 5: case 29: case 57: case 63: case 101: case 117:
- this.$ = $$[$0-1]; 
+ this.$ = $$[$0-1];
 break;
 case 6:
- this.$ = new yy.VariablesBlockNode([]); 
+ this.$ = new yy.VariablesBlockNode([]);
 break;
 case 7:
- this.$ = new yy.VariablesBlockNode($$[$0-1]); 
+ this.$ = new yy.VariablesBlockNode($$[$0-1]);
 break;
 case 8: case 115:
- this.$ = $$[$0]; 
+ this.$ = $$[$0];
 break;
 case 9:
- this.$ = $$[$0-1].concat($$[$0]); 
+ this.$ = $$[$0-1].concat($$[$0]);
 break;
 case 10: case 102: case 118:
- this.$ = [$$[$0]]; 
+ this.$ = [$$[$0]];
 break;
 case 11: case 103: case 119:
- $$[$0-2].push($$[$0]); this.$ = $$[$0-2]; 
+ $$[$0-2].push($$[$0]); this.$ = $$[$0-2];
 break;
 case 14:
- this.$ = yy.Util.createVariableDeclarationList($$[$0-3], $$[$0-1]); 
+ this.$ = yy.Util.createVariableDeclarationList($$[$0-3], $$[$0-1]);
 break;
 case 30: case 56:
- this.$ = new yy.StatementListNode([]); 
+ this.$ = new yy.StatementListNode([]);
 break;
 case 31:
- this.$ = new yy.StatementListNode([$$[$0]]); 
+ this.$ = new yy.StatementListNode([$$[$0]]);
 break;
 case 32: case 110:
- $$[$0-1].list.push($$[$0]); this.$ = $$[$0-1]; 
+ $$[$0-1].list.push($$[$0]); this.$ = $$[$0-1];
 break;
 case 39:
- this.$ = new yy.FunctionStatementNode($$[$0-1]); 
+ this.$ = new yy.FunctionStatementNode($$[$0-1]);
 break;
 case 40:
- this.$ = new yy.ReturnStatementNode($$[$0-1]); 
+ this.$ = new yy.ReturnStatementNode($$[$0-1]);
 break;
 case 41:
- this.$ = new yy.IdentifierNode($$[$0]); 
+ this.$ = new yy.IdentifierNode($$[$0]);
 break;
 case 45:
- this.$ = new yy.AssignmentExpressionNode($$[$0-2], $$[$0-3], $$[$0-1]); 
+ this.$ = new yy.AssignmentExpressionNode($$[$0-2], $$[$0-3], $$[$0-1]);
 break;
 case 46:
- this.$ = new yy.IfStatementNode($$[$0-2], new yy.StatementListNode([])); 
+ this.$ = new yy.IfStatementNode($$[$0-2], new yy.StatementListNode([]));
 break;
 case 47:
- this.$ = new yy.IfStatementNode($$[$0-3], $$[$0-1]); 
+ this.$ = new yy.IfStatementNode($$[$0-3], $$[$0-1]);
 break;
 case 48:
- this.$ = new yy.IfStatementNode($$[$0-5], $$[$0-3], $$[$0-1]); 
+ this.$ = new yy.IfStatementNode($$[$0-5], $$[$0-3], $$[$0-1]);
 break;
 case 49:
- this.$ = new yy.IfStatementNode($$[$0-4], new yy.StatementListNode([]), $$[$0-1]); 
+ this.$ = new yy.IfStatementNode($$[$0-4], new yy.StatementListNode([]), $$[$0-1]);
 break;
 case 50:
- this.$ = new yy.IfStatementNode($$[$0-4], $$[$0-2], new yy.StatementListNode([])); 
+ this.$ = new yy.IfStatementNode($$[$0-4], $$[$0-2], new yy.StatementListNode([]));
 break;
 case 51:
- this.$ = new yy.IfStatementNode($$[$0-3], new yy.StatementListNode([]), new yy.StatementListNode([])); 
+ this.$ = new yy.IfStatementNode($$[$0-3], new yy.StatementListNode([]), new yy.StatementListNode([]));
 break;
 case 52:
- this.$ = new yy.WhileStatementNode($$[$0-3], $$[$0-1]); 
+ this.$ = new yy.WhileStatementNode($$[$0-3], $$[$0-1]);
 break;
 case 53:
- this.$ = new yy.WhileStatementNode($$[$0-2], new yy.StatementListNode([])); 
+ this.$ = new yy.WhileStatementNode($$[$0-2], new yy.StatementListNode([]));
 break;
 case 54:
- this.$ = new yy.ForStatementNode($$[$0-5], $$[$0-3], $$[$0-1], null, $$[$0]); 
+ this.$ = new yy.ForStatementNode($$[$0-5], $$[$0-3], $$[$0-1], null, $$[$0]);
 break;
 case 55:
- this.$ = new yy.ForStatementNode($$[$0-6], $$[$0-4], $$[$0-2], $$[$0-1], $$[$0]); 
+ this.$ = new yy.ForStatementNode($$[$0-6], $$[$0-4], $$[$0-2], $$[$0-1], $$[$0]);
 break;
 case 58:
- this.$ = new yy.LiteralNode('Integer', yy.Util.createNumberFromRawString($$[$0]), $$[$0]); 
+ this.$ = new yy.LiteralNode('Integer', yy.Util.createNumberFromRawString($$[$0]), $$[$0]);
 break;
 case 59:
- this.$ = new yy.LiteralNode('Integer', yy.Util.createNumberFromRawString($$[$0-1] + $$[$0]), $$[$0-1] + $$[$0]); 
+ this.$ = new yy.LiteralNode('Integer', yy.Util.createNumberFromRawString($$[$0-1] + $$[$0]), $$[$0-1] + $$[$0]);
 break;
 case 70:
- this.$ = new yy.UnaryExpressionNode($$[$0-1], $$[$0]); 
+ this.$ = new yy.UnaryExpressionNode($$[$0-1], $$[$0]);
 break;
 case 72: case 73: case 74: case 76: case 77:
- this.$ = new yy.ArithmeticExpressionNode($$[$0-1], $$[$0-2], $$[$0]); 
+ this.$ = new yy.ArithmeticExpressionNode($$[$0-1], $$[$0-2], $$[$0]);
 break;
 case 79: case 80: case 81: case 82: case 84: case 85: case 87: case 89: case 91:
- this.$ = new yy.BinaryExpressionNode($$[$0-1], $$[$0-2], $$[$0]); 
+ this.$ = new yy.BinaryExpressionNode($$[$0-1], $$[$0-2], $$[$0]);
 break;
 case 93: case 94: case 96: case 97:
- this.$ = new yy.LogicalExpressionNode($$[$0-1], $$[$0-2], $$[$0]); 
+ this.$ = new yy.LogicalExpressionNode($$[$0-1], $$[$0-2], $$[$0]);
 break;
 case 98:
- this.$ = new yy.ExpressionNode($$[$0]); 
+ this.$ = new yy.ExpressionNode($$[$0]);
 break;
 case 99:
- this.$ = new yy.FunctionCallNode($$[$0-1], $$[$0]); 
+ this.$ = new yy.FunctionCallNode($$[$0-1], $$[$0]);
 break;
 case 100: case 116:
- this.$ = []; 
+ this.$ = [];
 break;
 case 104:
- this.$ = new yy.LiteralNode('literal', $$[$0], $$[$0]); 
+ this.$ = new yy.LiteralNode('literal', $$[$0], $$[$0]);
 break;
 case 105:
- this.$ = new yy.LiteralNode('inteiro', yy.Util.createNumberFromRawString($$[$0]), $$[$0]); 
+ this.$ = new yy.LiteralNode('inteiro', yy.Util.createNumberFromRawString($$[$0]), $$[$0]);
 break;
 case 106:
- this.$ = new yy.LiteralNode('real', new Number($$[$0]), $$[$0]); 
+ this.$ = new yy.LiteralNode('real', new Number($$[$0]), $$[$0]);
 break;
 case 107:
- this.$ = new yy.LiteralNode('caractere', $$[$0], $$[$0]); 
+ this.$ = new yy.LiteralNode('caractere', $$[$0], $$[$0]);
 break;
 case 108:
- this.$ = new yy.LiteralNode('lógico', $$[$0], $$[$0]); 
+ this.$ = new yy.LiteralNode('lógico', $$[$0], $$[$0]);
 break;
 case 109:
- this.$ = new yy.FunctionDeclarationListNode([$$[$0]]); 
+ this.$ = new yy.FunctionDeclarationListNode([$$[$0]]);
 break;
 case 111:
- this.$ = new yy.FunctionDeclarationNode($$[$0-2], null, $$[$0-1], [], $$[$0]); 
+ this.$ = new yy.FunctionDeclarationNode($$[$0-2], null, $$[$0-1], [], $$[$0]);
 break;
 case 112:
- this.$ = new yy.FunctionDeclarationNode($$[$0-3], null, $$[$0-2], $$[$0-1], $$[$0]); 
+ this.$ = new yy.FunctionDeclarationNode($$[$0-3], null, $$[$0-2], $$[$0-1], $$[$0]);
 break;
 case 113:
- this.$ = new yy.FunctionDeclarationNode($$[$0-3], $$[$0-1], $$[$0-2], [], $$[$0]); 
+ this.$ = new yy.FunctionDeclarationNode($$[$0-3], $$[$0-1], $$[$0-2], [], $$[$0]);
 break;
 case 114:
- this.$ = new yy.FunctionDeclarationNode($$[$0-4], $$[$0-2], $$[$0-3], $$[$0-1], $$[$0]); 
+ this.$ = new yy.FunctionDeclarationNode($$[$0-4], $$[$0-2], $$[$0-3], $$[$0-1], $$[$0]);
 break;
 case 120:
- this.$ = new yy.FunctionParameterNode($$[$0-2], $$[$0]); 
+ this.$ = new yy.FunctionParameterNode($$[$0-2], $$[$0]);
 break;
 }
 },
@@ -25489,149 +25489,149 @@ options: {},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0: /* ignore comment */ 
+case 0: /* ignore comment */
 break;
-case 1: this.begin('comment'); 
+case 1: this.begin('comment');
 break;
-case 2: this.popState(); 
+case 2: this.popState();
 break;
-case 3: /* ignore comment */ 
+case 3: /* ignore comment */
 break;
-case 4: /* ignore space */ 
+case 4: /* ignore space */
 break;
-case 5: return 6; 
+case 5: return 6;
 break;
-case 6: return "T_REAL_LIT" 
+case 6: return "T_REAL_LIT"
 break;
-case 7: return "T_INT_LIT" 
+case 7: return "T_INT_LIT"
 break;
-case 8: return "T_STRING_LIT"; 
+case 8: return "T_STRING_LIT";
 break;
-case 9: return "T_STRING_LIT"; 
+case 9: return "T_STRING_LIT";
 break;
-case 10: return "T_CARAC_LIT"; 
+case 10: return "T_CARAC_LIT";
 break;
-case 11: return "T_BOOL_LIT"; 
+case 11: return "T_BOOL_LIT";
 break;
-case 12: return "T_BOOL_LIT"; 
+case 12: return "T_BOOL_LIT";
 break;
-case 13: return "ALGORITMO"; 
+case 13: return "ALGORITMO";
 break;
-case 14: return "VARIAVEIS"; 
+case 14: return "VARIAVEIS";
 break;
-case 15: return "FIM_VARIAVEIS"; 
+case 15: return "FIM_VARIAVEIS";
 break;
-case 16: return "FIM_ENQUANTO"; 
+case 16: return "FIM_ENQUANTO";
 break;
-case 17: return "FIM_PARA"; 
+case 17: return "FIM_PARA";
 break;
-case 18: return "FIM_SE"; 
+case 18: return "FIM_SE";
 break;
-case 19: return "FIM"; 
+case 19: return "FIM";
 break;
-case 20: return "INTEIRO"; 
+case 20: return "INTEIRO";
 break;
-case 21: return "REAL"; 
+case 21: return "REAL";
 break;
-case 22: return "CARACTERE"; 
+case 22: return "CARACTERE";
 break;
-case 23: return "LITERAL"; 
+case 23: return "LITERAL";
 break;
-case 24: return "LOGICO"; 
+case 24: return "LOGICO";
 break;
-case 25: return "INICIO"; 
+case 25: return "INICIO";
 break;
-case 26: return "SE"; 
+case 26: return "SE";
 break;
-case 27: return "SENAO"; 
+case 27: return "SENAO";
 break;
-case 28: return "ENQUANTO"; 
+case 28: return "ENQUANTO";
 break;
-case 29: return "ENTAO"; 
+case 29: return "ENTAO";
 break;
-case 30: return "FACA"; 
+case 30: return "FACA";
 break;
-case 31: return "PARA"; 
+case 31: return "PARA";
 break;
-case 32: return "DE"; 
+case 32: return "DE";
 break;
-case 33: return "ATE"; 
+case 33: return "ATE";
 break;
-case 34: return "E"; 
+case 34: return "E";
 break;
-case 35: return "OU"; 
+case 35: return "OU";
 break;
-case 36: return "NAO"; 
+case 36: return "NAO";
 break;
-case 37: return "MATRIZ"; 
+case 37: return "MATRIZ";
 break;
-case 38: return "INTEIROS"; 
+case 38: return "INTEIROS";
 break;
-case 39: return "REAIS"; 
+case 39: return "REAIS";
 break;
-case 40: return "CARACTERES"; 
+case 40: return "CARACTERES";
 break;
-case 41: return "LITERAIS"; 
+case 41: return "LITERAIS";
 break;
-case 42: return "LOGICOS"; 
+case 42: return "LOGICOS";
 break;
-case 43: return "FUNCAO"; 
+case 43: return "FUNCAO";
 break;
-case 44: return "RETORNE"; 
+case 44: return "RETORNE";
 break;
-case 45: return "PASSO"; 
+case 45: return "PASSO";
 break;
-case 46: return "T_IDENTIFICADOR"; 
+case 46: return "T_IDENTIFICADOR";
 break;
-case 47: return ":="; 
+case 47: return ":=";
 break;
-case 48: return ";"; 
+case 48: return ";";
 break;
-case 49: return ":"; 
+case 49: return ":";
 break;
-case 50: return ","; 
+case 50: return ",";
 break;
-case 51: return "["; 
+case 51: return "[";
 break;
-case 52: return "]"; 
+case 52: return "]";
 break;
-case 53: return "("; 
+case 53: return "(";
 break;
-case 54: return ")"; 
+case 54: return ")";
 break;
-case 55: return "+"; 
+case 55: return "+";
 break;
-case 56: return "-"; 
+case 56: return "-";
 break;
-case 57: return "*"; 
+case 57: return "*";
 break;
-case 58: return "/"; 
+case 58: return "/";
 break;
-case 59: return "%"; 
+case 59: return "%";
 break;
-case 60: return "||"; 
+case 60: return "||";
 break;
-case 61: return "&&"; 
+case 61: return "&&";
 break;
-case 62: return "|"; 
+case 62: return "|";
 break;
-case 63: return "&"; 
+case 63: return "&";
 break;
-case 64: return "^"; 
+case 64: return "^";
 break;
-case 65: return "~"; 
+case 65: return "~";
 break;
-case 66: return "<>"; 
+case 66: return "<>";
 break;
-case 67: return ">="; 
+case 67: return ">=";
 break;
-case 68: return "<="; 
+case 68: return "<=";
 break;
-case 69: return "<"; 
+case 69: return "<";
 break;
-case 70: return ">"; 
+case 70: return ">";
 break;
-case 71: return "="; 
+case 71: return "=";
 break;
 }
 },
@@ -25666,6 +25666,7 @@ if (typeof module !== 'undefined' && require.main === module) {
   exports.main(process.argv.slice(1));
 }
 }
+
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"_process":19,"fs":17,"path":18}],11:[function(require,module,exports){
 (function (global){
@@ -25795,7 +25796,7 @@ Interpreter.prototype = {
                 item.type = args[i].type;
             }
 
-            alert(JSON.stringify(args[i]));
+            //alert(JSON.stringify(args[i]));
 
             if (item.type != args[i].type) {
                 global.terminal.error('Erro de Tipagem: Variável do tipo: ' + item.type + '. Encontrado: ' + args[i].type);
@@ -25857,7 +25858,7 @@ Interpreter.prototype = {
     visitWhileStatementNode: function (node, context) {
         var ret = null;
         while (this.getValue(this.visit(node.test, context))) {
-            if ((ret = this.visit(node.body, context)) !== undefined) {
+            if ((ret = this.visit(node.body, context).value) !== undefined) {
                 return ret;
             }
         }
@@ -25877,7 +25878,7 @@ Interpreter.prototype = {
         end = this.getValue(end);
 
         for (index.value = start; (start <= end) ? index.value <= end : index.value >= end; index.value += update) {
-            if ((ret = this.visit(node.body, context)) !== undefined) {
+            if ((ret = this.visit(node.body, context).value) !== undefined) {
                 return ret;
             }
         }
@@ -26115,7 +26116,7 @@ Imprima.addParameter('text', 'literal');
 
 Imprima.setBody(function (text) {
 	global.terminal.echo(text);
-    //console.log(text);
+    console.log(text);
 });
 std.setFunction('imprima', Imprima);
 
@@ -26128,8 +26129,10 @@ var Leia = new NativeFunction('leia', 'qualquer');
 Leia.setBody(function (x, variavel) {
 	//global.terminal.insert("10");
 	//global.terminal.push();
-
-    variavel = prompt(this.id);
+    // global.valor='';
+    // while (global.valor==''){ setTimeout('', 5000);}
+    // variavel = global.valor;
+    variavel = prompt("Informe o valor: ");
 	//var ret = prompt(variavel);
 	//global.terminal.insert("10");
 	//var ret = global.terminal.read("", function (input) {console.log("ok")});
