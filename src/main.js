@@ -26007,7 +26007,9 @@ Interpreter.prototype = {
 
         for (var i=0; i<list.length; i++) {
             if ((ret = this.visit(list[i], context)) !== undefined) {
-                return ret; //if there's a return value we must break the statement list
+                if ((ret.type) !== "vazio"){
+                    return ret; //if there's a return value we must break the statement list
+                }
             }
         }
 
@@ -26072,7 +26074,7 @@ function compile(ptcode) {
 function execute(ptcode, context) {
     var ast = parse(ptcode),
         interpreter = new Interpreter(ast, context || new Context());
-
+    console.log(JSON.stringify(ast));
     return interpreter.execute();
 }
 

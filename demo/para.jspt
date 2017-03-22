@@ -1,0 +1,14 @@
+algoritmo teste;
+variaveis
+    x:inteiro;
+fimvariaveis
+inicio
+    x:=1;
+    para x de 1 ate 10 faca
+    	se x = 5 entao
+        	imprima("ok");
+        fimse
+        imprima ("x = "+x);
+    fimpara
+fim
+    
