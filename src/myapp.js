@@ -23,7 +23,7 @@ jQuery(function($) {
         greetings: '',
         name: 'portugol',
         height: 200,
-        prompt: '' 
+        prompt: ''
     });
     global.terminal.freeze(false);
 });
@@ -43,7 +43,7 @@ var editor = CodeMirror.fromTextArea(document.getElementById("codigo"), {
     lineNumbers: true,
     theme: 'eclipse',
     mode: "portugol"
-}); 
+});
 
 // DESCOMENTAR QUANDO FOR PASSAR PARA O MOODLE
 //idportugol e idaluno do moodle
@@ -53,7 +53,7 @@ var editor = CodeMirror.fromTextArea(document.getElementById("codigo"), {
 // jQuery.ajax({
 //     type: "POST",
 //     url: 'buscar.php',
-//     data: { idportugol: idportugol, idaluno: idaluno}, 
+//     data: { idportugol: idportugol, idaluno: idaluno},
 //     success:function(data) {
 //         editor.setValue(data);
 //     }
@@ -72,9 +72,9 @@ var btnSalvar = jQuery('#salvar').on('click', function() {
     jQuery.ajax({
         type: "POST",
         url: 'salvar.php',
-        data: { codigo: editor.getValue(), idportugol: idportugol, idaluno: idaluno }, 
+        data: { codigo: editor.getValue(), idportugol: idportugol, idaluno: idaluno },
         success:function(data) {
-            alert(data); 
+            alert(data);
         }
     });
 });

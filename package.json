@@ -4,8 +4,7 @@
   "description": "Portugol no javascript",
   "main": "index.js",
   "scripts": {
-    "buildOld": "browserify src/myapp.js -o src/main.js",
-    "build": "browserify -t browserify-css src/myapp.js -o src/main.js"
+    "build": "./build.sh"
   },
   "repository": {
     "type": "git",
