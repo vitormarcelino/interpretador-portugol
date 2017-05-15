@@ -11,7 +11,7 @@ global.controle = 0;
 global.valor = null;
 require('jquery.terminal');
 jQuery(function($) {
-    global.terminal = $('#term_demo').terminal(function(command, term) {
+    global.terminal = $('#terminal').terminal(function(command, term) {
         if (command == "js") {
             alert("ok");
         }
@@ -37,7 +37,7 @@ var jspt = require('jspt');
 //REQUIRE CODEMIRROR
 var CodeMirror = require('codemirror/lib/codemirror');
 
-var editor = CodeMirror.fromTextArea(document.getElementById("codigo"), {
+var editor = CodeMirror.fromTextArea(document.getElementById('codigo'), {
     lineNumbers: false,
     readOnly: false,
     lineNumbers: true,
