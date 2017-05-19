@@ -21,6 +21,7 @@ jQuery(function($) {
       alert(global.valor);
     }, {
         greetings: '',
+        enabled: false,
         name: 'portugol',
         height: 200,
         prompt: ''
