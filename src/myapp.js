@@ -1,24 +1,23 @@
 //CSS
 var css = require('./app.css');
 
+//VARIAVEL GLOBAL QUE DEFINE SE A EXECUÇÃO É DE CORREÇÃO OU EXECUÇÃO
+global.isCorrection = false;
+global.correctionInput = [55, 65];
+global.correctionOutput = ["x = 55"];
 
-//REQUIRE NO JQUERY
+
+//REQUIRE DO JQUERY
 global.jQuery = require('jquery');
 
 //TERMINAL
 global.terminal = null;
-global.controle = 0;
-global.valor = null;
 require('jquery.terminal');
 jQuery(function($) {
     global.terminal = $('#terminal').terminal(function(command, term) {
         if (command == "js") {
             alert("ok");
         }
-      //FUNÇÕES DO TERMINAL
-      global.controle = 1;
-      global.valor = command;
-      alert(global.valor);
     }, {
         greetings: '',
         enabled: false,
@@ -26,7 +25,7 @@ jQuery(function($) {
         height: 200,
         prompt: ''
     });
-    global.terminal.freeze(false);
+    global.terminal.freeze(true);
 });
 
 //REQUIRE MODE PORTUGOL PARA CODEMIRROR
@@ -46,7 +45,26 @@ var editor = CodeMirror.fromTextArea(document.getElementById('codigo'), {
     mode: "portugol"
 });
 
-// DESCOMENTAR QUANDO FOR PASSAR PARA O MOODLE
+jQuery('body').append(editor);
+
+var btn = jQuery('#exec').on('click', function() {
+  //LIMPA O TERMINAL
+  global.terminal.clear();
+  var codigo = editor.getValue();
+  global.isCorrection = false;
+  jspt.execute(codigo, createContext());
+});
+
+var btnCorrigir = jQuery('#corrigir').on('click', function() {
+  //LIMPA O TERMINAL
+  global.terminal.clear();
+  var codigo = editor.getValue();
+  global.isCorrection = true;
+  global.correctionAtualInput = 0;
+  jspt.execute(codigo, createContext());
+});
+
+// DESCOMENTAR QUANDO FOR PASSAR PARA O MOODLE - APENAS PARA MODULO DE ATIVIDADES
 //idportugol e idaluno do moodle
 // var idportugol = document.getElementById("idportugol").getAttribute("value");
 // var idaluno = document.getElementById("idaluno").getAttribute("value");
@@ -60,25 +78,17 @@ var editor = CodeMirror.fromTextArea(document.getElementById('codigo'), {
 //     }
 // });
 
-jQuery('body').append(editor);
-
-var btn = jQuery('#exec').on('click', function() {
-	//LIMPA O TERMINAL
-	global.terminal.clear();
-	var codigo = editor.getValue();
-    jspt.execute(codigo, createContext());
-});
-
-var btnSalvar = jQuery('#salvar').on('click', function() {
-    jQuery.ajax({
-        type: "POST",
-        url: 'salvar.php',
-        data: { codigo: editor.getValue(), idportugol: idportugol, idaluno: idaluno },
-        success:function(data) {
-            alert(data);
-        }
-    });
-});
+//APENAS PARA O MÓDULO DE ATIVIDADES
+// var btnSalvar = jQuery('#salvar').on('click', function() {
+//     jQuery.ajax({
+//         type: "POST",
+//         url: 'salvar.php',
+//         data: { codigo: editor.getValue(), idportugol: idportugol, idaluno: idaluno },
+//         success:function(data) {
+//             alert(data);
+//         }
+//     });
+// });
 
 //FUNÇÃO CRIAR CONTEXTO PARA A EXECUÇÃO
 function createContext() {
