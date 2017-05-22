@@ -4,7 +4,7 @@ var css = require('./app.css');
 //VARIAVEL GLOBAL QUE DEFINE SE A EXECUÇÃO É DE CORREÇÃO OU EXECUÇÃO
 global.isCorrection = false;
 global.correctionInput = [55, 65];
-global.correctionOutput = ["x = 55"];
+global.correctionOutput = "x = 55 - y = 65\nx = 55 - y = 65";
 
 
 //REQUIRE DO JQUERY
@@ -61,7 +61,15 @@ var btnCorrigir = jQuery('#corrigir').on('click', function() {
   var codigo = editor.getValue();
   global.isCorrection = true;
   global.correctionAtualInput = 0;
+  global.attempOutput = '';
   jspt.execute(codigo, createContext());
+  global.terminal.echo("SAÍDA DA EXECUÇÃO");
+  global.terminal.echo(global.attempOutput);
+  global.terminal.echo("SAÍDA ESPERADA");
+  global.terminal.echo(global.correctionOutput);
+  if (global.attempOutput == global.correctionOutput) {
+    alert("Parabens!");
+  }
 });
 
 // DESCOMENTAR QUANDO FOR PASSAR PARA O MOODLE - APENAS PARA MODULO DE ATIVIDADES

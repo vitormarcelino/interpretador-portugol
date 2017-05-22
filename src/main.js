@@ -26128,9 +26128,11 @@ Imprima.addParameter('valor', 'qualquer');
 
 Imprima.setBody(function (valor) {
   if (global.isCorrection) {
+    global.attempOutput += valor + "\n";
     console.log(valor);
+  } else {
+    global.terminal.echo(valor);
   }
-	global.terminal.echo(valor);
 });
 std.setFunction('imprima', Imprima);
 
@@ -26143,7 +26145,6 @@ var Leia = new NativeFunction('leia', 'qualquer');
 Leia.setBody(function (x, variavel) {
   if (global.isCorrection) {
     variavel = global.correctionInput[global.correctionAtualInput];
-    alert(variavel);
     global.correctionAtualInput++;
   } else {
     variavel = prompt("Informe o valor: ");
@@ -26217,7 +26218,7 @@ var css = require('./app.css');
 //VARIAVEL GLOBAL QUE DEFINE SE A EXECUÇÃO É DE CORREÇÃO OU EXECUÇÃO
 global.isCorrection = false;
 global.correctionInput = [55, 65];
-global.correctionOutput = ["x = 55"];
+global.correctionOutput = "x = 55 - y = 65\nx = 55 - y = 65";
 
 
 //REQUIRE DO JQUERY
@@ -26274,7 +26275,15 @@ var btnCorrigir = jQuery('#corrigir').on('click', function() {
   var codigo = editor.getValue();
   global.isCorrection = true;
   global.correctionAtualInput = 0;
+  global.attempOutput = '';
   jspt.execute(codigo, createContext());
+  global.terminal.echo("SAÍDA DA EXECUÇÃO");
+  global.terminal.echo(global.attempOutput);
+  global.terminal.echo("SAÍDA ESPERADA");
+  global.terminal.echo(global.correctionOutput);
+  if (global.attempOutput == global.correctionOutput) {
+    alert("Parabens!");
+  }
 });
 
 // DESCOMENTAR QUANDO FOR PASSAR PARA O MOODLE - APENAS PARA MODULO DE ATIVIDADES
