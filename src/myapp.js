@@ -4,7 +4,7 @@ var css = require('./app.css');
 //VARIAVEL GLOBAL QUE DEFINE SE A EXECUÇÃO É DE CORREÇÃO OU EXECUÇÃO
 global.isCorrection = false;
 global.correctionInput = [55, 65];
-global.correctionOutput = "x = 55 - y = 65\nx = 55 - y = 65";
+global.correctionOutput = "x = 55 - y = 65" + "\n";
 
 
 //REQUIRE DO JQUERY
