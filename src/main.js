@@ -24728,6 +24728,7 @@ function Context(items) {
 Context.prototype = {
     setVariable: function (id, type, value) {
         this.items[id] = new ContextItem(id, type, value);
+        // global.contextCorrection[id] = new ContextItem(id, type, value);
     },
     setFunction: function (id, fn) {
         this.items[id] = new ContextItem(id, 'Function', fn);
@@ -24743,7 +24744,7 @@ Context.prototype = {
     },
     copy: function () {
         var copied = {};
-        
+
         for (var i in this.items) {
             if (this.items.hasOwnProperty(i)) {
                 copied[i] = this.items[i];
@@ -25802,7 +25803,7 @@ Interpreter.prototype = {
                 var oldType = item.type;
                 item.type = args[i].type;
             }
-            
+
             // alert(JSON.stringify(args[i].type) + " - " + JSON.stringify(item.type));
 
             // alert(JSON.stringify(args[i]));
@@ -25811,7 +25812,7 @@ Interpreter.prototype = {
                 global.terminal.error('#2 Erro de Tipagem: Variável do tipo: ' + item.type + '. Encontrado: ' + args[i].type);
                 throw new Error('#2 Erro de Tipagem: Variável do tipo: ' + item.type + '. Encontrado: ' + args[i].type);
             }
-            
+
             item.type = oldType;
             fnContext.setVariable(item.id, item.type, args[i].value);
         }
@@ -25893,6 +25894,7 @@ Interpreter.prototype = {
                 return ret;
             }
         }
+        context.setFunction(node.value.name, node); //TODO
     },
     visitUnaryExpressionNode: function (node, context) {
         var argument = this.visit(node.argument, context);
@@ -26560,83 +26562,35 @@ var process = module.exports = {};
 var cachedSetTimeout;
 var cachedClearTimeout;
 
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
 (function () {
     try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
+        cachedSetTimeout = setTimeout;
     } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
+        cachedSetTimeout = function () {
+            throw new Error('setTimeout is not defined');
+        }
     }
     try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
+        cachedClearTimeout = clearTimeout;
     } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
+        cachedClearTimeout = function () {
+            throw new Error('clearTimeout is not defined');
+        }
     }
 } ())
 function runTimeout(fun) {
     if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
         return setTimeout(fun, 0);
+    } else {
+        return cachedSetTimeout.call(null, fun, 0);
     }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
 }
 function runClearTimeout(marker) {
     if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
+        clearTimeout(marker);
+    } else {
+        cachedClearTimeout.call(null, marker);
     }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
 }
 var queue = [];
 var draining = false;
