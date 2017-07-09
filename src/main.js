@@ -25894,7 +25894,6 @@ Interpreter.prototype = {
                 return ret;
             }
         }
-        context.setFunction(node.value.name, node); //TODO
     },
     visitUnaryExpressionNode: function (node, context) {
         var argument = this.visit(node.argument, context);
@@ -26150,6 +26149,7 @@ Leia.setBody(function (x, variavel) {
     global.correctionAtualInput++;
   } else {
     variavel = prompt("Informe o valor: ");
+    global.terminal.echo(">> " + variavel);
   }
 	return variavel;
 });
@@ -26271,22 +26271,22 @@ var btn = jQuery('#exec').on('click', function() {
   jspt.execute(codigo, createContext());
 });
 
-var btnCorrigir = jQuery('#corrigir').on('click', function() {
-  //LIMPA O TERMINAL
-  global.terminal.clear();
-  var codigo = editor.getValue();
-  global.isCorrection = true;
-  global.correctionAtualInput = 0;
-  global.attempOutput = '';
-  jspt.execute(codigo, createContext());
-  global.terminal.echo("SAÍDA DA EXECUÇÃO");
-  global.terminal.echo(global.attempOutput);
-  global.terminal.echo("SAÍDA ESPERADA");
-  global.terminal.echo(global.correctionOutput);
-  if (global.attempOutput == global.correctionOutput) {
-    alert("Parabens!");
-  }
-});
+// var btnCorrigir = jQuery('#corrigir').on('click', function() {
+//   //LIMPA O TERMINAL
+//   global.terminal.clear();
+//   var codigo = editor.getValue();
+//   global.isCorrection = true;
+//   global.correctionAtualInput = 0;
+//   global.attempOutput = '';
+//   jspt.execute(codigo, createContext());
+//   global.terminal.echo("SAÍDA DA EXECUÇÃO");
+//   global.terminal.echo(global.attempOutput);
+//   global.terminal.echo("SAÍDA ESPERADA");
+//   global.terminal.echo(global.correctionOutput);
+//   if (global.attempOutput == global.correctionOutput) {
+//     alert("Parabens!");
+//   }
+// });
 
 // DESCOMENTAR QUANDO FOR PASSAR PARA O MOODLE - APENAS PARA MODULO DE ATIVIDADES
 //idportugol e idaluno do moodle

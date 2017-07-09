@@ -1,0 +1,14 @@
+algoritmo ex10;
+// Função : A Loja Mamão com Açúcar está vendendo seus produtos em 5
+// (cinco) prestações sem juros. Faça um algoritmo que
+// receba um valor de uma compra e mostre o valor das prestações.
+variaveis
+    compra, prestacao: real;
+fimvariaveis
+inicio
+	imprima("========== Loja Mamão com Açúcar ==========");
+	imprima("Digite o valor da compra: ");
+	compra:=leia();
+	prestacao:= compra / 5;
+    imprima("Cada prestação será de " + prestacao);
+fim

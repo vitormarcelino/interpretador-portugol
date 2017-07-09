@@ -1,0 +1,19 @@
+algoritmo ex3;
+Função : Faça um algoritmo que receba dois números e ao final mostre a soma, a subtração, a multiplicação e o produto
+variaveis
+    x,y,z:real;
+fimvariaveis
+inicio
+	imprima("Digite o primeiro número: ");
+	x:=leia();
+	imprima("Digite o segundo número: ");
+	y:=leia();
+    z:=x+y;
+	imprima("A soma é: "+z);
+    z:=x-y;
+	imprima("A subtração é: "+z);
+    z:=x*y;
+	imprima("A multiplicação é: "+z);
+    z:=x/y;
+	imprima("A divisão é: "+z);
+fim

@@ -1,0 +1,14 @@
+algoritmo ex9;
+// Função : Faça um algoritmo que receba um valor que foi depositado e
+// exiba o valor com rendimento após um mês.
+// Considere fixo o juro da poupança em 0,70% a. m.
+variaveis
+    deposito, rendimento: real;
+fimvariaveis
+inicio
+	imprima("Sistema de depósito do Banco do Oeste");
+	imprima("Digite o valor depositado: ");
+	deposito:=leia();
+	rendimento:= deposito + deposito * 0.07;
+    imprima("Seu dinheiro rendeu após um mês " + rendimento);
+fim

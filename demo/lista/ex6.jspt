@@ -1,0 +1,19 @@
+algoritmo ex6;
+// Função : Ler dois valores para as variáveis A e B, e efetuar as trocas
+// dos valores de forma que a variável A passe a possuir o
+// valor da variável B e a variável B passe a possuir o valor da variável
+// A. Apresentar os valores trocados.
+variaveis
+    a, b, troca: inteiro;
+fimvariaveis
+inicio
+	imprima("Digite o valor(numérico) da variável A: ");
+	a:=leia();
+	imprima("Digite o valor(numérico) da variável B: ");
+	b:=leia();
+	troca:=a;
+    a:=b;
+    b:=troca;
+    imprima("Novo valor de A: "+a);
+    imprima("Novo valor de B: "+b);
+fim

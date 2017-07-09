@@ -1,0 +1,13 @@
+algoritmo ex1;
+// Função : Faça um algoritmo que receba dois números e exiba o resultado de sua soma
+variaveis
+    x,y,z:inteiro;
+fimvariaveis
+inicio
+	imprima("Digite o primeiro número: ");
+    x:=leia();
+	imprima("Digite o segundo número: ");
+	y:=leia();
+    z:=x+y;
+	imprima("A soma dos números é: "+z);
+fim
