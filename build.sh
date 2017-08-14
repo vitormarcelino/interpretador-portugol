@@ -1,7 +1,9 @@
 #!/bin/sh
+echo "Generating parser"
+jison node_modules/jspt/lib/jspt/grammar.jison -o node_modules/jspt/lib/jspt/grammar.js -m commonjs
 echo "Compile interpreter..."
 browserify -t browserify-css src/myapp.js -o src/main.js
-echo "Copying files to moodle..."
+# echo "Copying files to moodle..."
 # cp src/main.js /home/vitor/moodle-docker/qportugol/portugol_interpreter/main.js
 # cp src/app.css /home/vitor/moodle-docker/qportugol/portugol_interpreter/app.css
 # cp src/main.js /home/vitor/moodle-docker/portugol/portugol_interpreter/main.js
