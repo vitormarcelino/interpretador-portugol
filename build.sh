@@ -1,6 +1,9 @@
 #!/bin/sh
 echo "Generating parser"
 jison node_modules/jspt/lib/jspt/grammar.jison -o node_modules/jspt/lib/jspt/grammar.js -m commonjs
+
+sed -e 's/throw new Error(str);/global.terminal.error(str); throw new Error(str);/g' node_modules/jspt/lib/jspt/grammar.js -i
+
 echo "Compile interpreter..."
 browserify -t browserify-css src/myapp.js -o src/main.js
 # echo "Copying files to moodle..."
