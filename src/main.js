@@ -24311,18 +24311,16 @@ var AST = {
         this.name = 'VariablesBlock';
         this.list = variablesList;
     },
-    VariableDeclarationNode: function (id, type, length) {
+    VariableDeclarationNode: function (id, type) {
         this.name = 'VariableDeclaration';
         this.id = id;
         this.type = type;
-        this.length = length === undefined ? 0 : length ;
     },
     MatrizDeclarationNode: function (id, type, length) {
         this.name = 'MatrizDeclaration';
         this.id = id;
         this.type = type;
 		this.length = length;
-		//this.values = [index];
     },
     ExpressionNode: function (expression) {
         this.name = 'Expression';
@@ -24428,15 +24426,20 @@ var AST = {
 };
 
 AST.Util = {
-    createVariableDeclarationList: function (ids, type, length) {
+    createVariableDeclarationList: function (ids, type) {
         var list = [];
 
         for (var i=0; i<ids.length; i++) {
-            // if (type == 'matriz') {
-            //     list.push(new AST.MatrizDeclarationNode(ids[i], type, length));
-            // } else {
-            // }
-            list.push(new AST.VariableDeclarationNode(ids[i], type, length));
+            list.push(new AST.VariableDeclarationNode(ids[i], type));
+        }
+
+        return list;
+    },
+    createMatrizDeclarationList: function (ids, type, length) {
+        var list = [];
+
+        for (var i=0; i<ids.length; i++) {
+            list.push(new AST.MatrizDeclarationNode(ids[i], type, length));
         }
 
         return list;
@@ -24742,8 +24745,18 @@ function Context(items) {
 }
 
 Context.prototype = {
-    setVariable: function (id, type, value, length) {
-        this.items[id] = new ContextItem(id, type, value, length);
+    setVariable: function (id, type, value) {
+        this.items[id] = new ContextItem(id, type, value);
+    },
+    setMatriz: function (id, index, value) {
+        //TO-DO
+    },
+    declareMatriz: function(id, type, value, length) {
+        var values = {};
+        for (var i = 0; i < length; i++) {
+            values[i] = new ContextItem(undefined, type, value);
+        }
+        this.items[id] = new ContextMatriz(id, type, values, length);
     },
     setFunction: function (id, fn) {
         this.items[id] = new ContextItem(id, 'Function', fn);
@@ -24753,6 +24766,9 @@ Context.prototype = {
     },
     getItem: function (id) {
         return this.items[id];
+    },
+    getMatrizIndex: function (id, index) {
+        return this.items[id].values[index];
     },
     getItemValue: function (id) {
         return (this.items[id] && this.items[id].value) || this.items[id];
@@ -24784,10 +24800,16 @@ Context.prototype = {
     }
 };
 
-function ContextItem(id, type, value, length) {
+function ContextItem(id, type, value) {
     this.id = id;
     this.type = type;
     this.value = (value !== undefined) ? value : null;
+}
+
+function ContextMatriz(id, type, value, length) {
+    this.id = id;
+    this.type = type;
+    this.values = (value !== undefined) ? value : null;
     this.length = (length !== undefined) ? length : 0;
 }
 
@@ -24917,7 +24939,7 @@ case 15:
  this.$ = yy.Util.createVariableDeclarationList($$[$0-3], $$[$0-1]); 
 break;
 case 16:
- this.$ = yy.Util.createVariableDeclarationList($$[$0-6], $$[$0-1], $$[$0-3]); 
+ this.$ = yy.Util.createMatrizDeclarationList($$[$0-6], $$[$0-1], $$[$0-3]); 
 break;
 case 32: case 58:
  this.$ = new yy.StatementListNode([]); 
@@ -25757,7 +25779,12 @@ Interpreter.prototype = {
     visitVariableDeclarationNode: function (node, context) {
         var defaultValue = Interpreter.VAR_DEFAULT_VALUES[node.type];
 
-        context.setVariable(node.id, node.type, defaultValue, node.length);
+        context.setVariable(node.id, node.type, defaultValue);
+    },
+    visitMatrizDeclarationNode: function (node, context) {
+        var defaultValue = Interpreter.VAR_DEFAULT_VALUES[node.type];
+
+        context.declareMatriz(node.id, node.type, defaultValue, node.length);
     },
     visitAssignmentExpressionNode: function (node, context) {
         var ident = this.visit(node.left, context),
@@ -26026,7 +26053,7 @@ Interpreter.prototype = {
             throw new Error('Vetor não declarado: ' + node.id);
         }
 
-        return context.getItem(node.id);
+        return context.getMatrizIndex(node.id, node.index);
     },
     visitBooleanLiteral: function (value) {
         if (value == 'verdadeiro') {
@@ -26054,9 +26081,6 @@ Interpreter.prototype = {
         }
 
         return new AST.LiteralNode('vazio');
-    },
-    visitMatrizDeclarationNode: function(node) {
-        return node;
     },
     getValue: function (node) {
         if (typeof node.value !== 'undefined') {
