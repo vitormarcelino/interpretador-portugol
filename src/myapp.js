@@ -55,6 +55,31 @@ var btn = jQuery('#exec').on('click', function() {
   jspt.execute(codigo, createContext());
 });
 
+if(jQuery('#save').length) {
+    var idportugol = document.getElementById("idportugol").getAttribute("value");
+    var idaluno = document.getElementById("idaluno").getAttribute("value");
+
+    jQuery.ajax({
+        type: "POST",
+        url: 'buscar.php',
+        data: { idportugol: idportugol, idaluno: idaluno},
+        success:function(data) {
+            editor.setValue(data);
+        }
+    });
+
+    var btnSalvar = jQuery('#save').on('click', function() {
+        jQuery.ajax({
+            type: "POST",
+            url: 'salvar.php',
+            data: { codigo: editor.getValue(), idportugol: idportugol, idaluno: idaluno },
+            success:function(data) {
+                alert(data);
+            }
+        });
+    });
+}
+
 // var btnCorrigir = jQuery('#corrigir').on('click', function() {
 //   //LIMPA O TERMINAL
 //   global.terminal.clear();
@@ -70,32 +95,6 @@ var btn = jQuery('#exec').on('click', function() {
 //   if (global.attempOutput == global.correctionOutput) {
 //     alert("Parabens!");
 //   }
-// });
-
-// DESCOMENTAR QUANDO FOR PASSAR PARA O MOODLE - APENAS PARA MODULO DE ATIVIDADES
-//idportugol e idaluno do moodle
-// var idportugol = document.getElementById("idportugol").getAttribute("value");
-// var idaluno = document.getElementById("idaluno").getAttribute("value");
-
-// jQuery.ajax({
-//     type: "POST",
-//     url: 'buscar.php',
-//     data: { idportugol: idportugol, idaluno: idaluno},
-//     success:function(data) {
-//         editor.setValue(data);
-//     }
-// });
-
-//APENAS PARA O MÓDULO DE ATIVIDADES
-// var btnSalvar = jQuery('#salvar').on('click', function() {
-//     jQuery.ajax({
-//         type: "POST",
-//         url: 'salvar.php',
-//         data: { codigo: editor.getValue(), idportugol: idportugol, idaluno: idaluno },
-//         success:function(data) {
-//             alert(data);
-//         }
-//     });
 // });
 
 //FUNÇÃO CRIAR CONTEXTO PARA A EXECUÇÃO
